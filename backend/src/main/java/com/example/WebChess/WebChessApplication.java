@@ -2,6 +2,7 @@ package com.example.WebChess;
 
 import com.example.WebChess.account.AccountService;
 import com.example.WebChess.game.Game;
+import com.example.WebChess.game.GameDTO_accountIDs;
 import com.example.WebChess.game.GameService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -23,7 +24,7 @@ public class WebChessApplication {
 			accountService.createAccount("User1");
 			accountService.createAccount("User2");
 
-			Optional<Game> game=gameService.create("User1", "User2");
+			Optional<GameDTO_accountIDs> game=gameService.create("User1", "User2");
 
 			if(game.isPresent()){
 				gameService.makeAMove(game.get().getId(), 0, 0, 1, 1);

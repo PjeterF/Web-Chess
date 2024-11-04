@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AccountService {
@@ -15,15 +16,19 @@ public class AccountService {
         this.accountRepository = accountRepository;
     }
 
-    public List<Account> getAll(){
-        return accountRepository.findAll();
+    public List<AccountDTO_gameIDs> getAll(){
+        return accountRepository.findAll().stream().map(AccountDTO_gameIDs::new).toList();
     }
 
-    public Optional<Account> getByUsername(String username){
-        return accountRepository.findByUsername(username);
+    public Optional<AccountDTO_gameIDs> getByUsername(String username){
+        Optional<Account> account=accountRepository.findByUsername(username);
+        if(account.isEmpty()){
+            return Optional.empty();
+        }
+        return Optional.of(new AccountDTO_gameIDs(account.get()));
     }
 
-    public Optional<Account> createAccount(String username){
+    public Optional<AccountDTO_gameIDs> createAccount(String username){
         Optional<Account> searchedAccount=accountRepository.findByUsername(username);
         if(searchedAccount.isPresent()){
             return Optional.empty();
@@ -31,6 +36,6 @@ public class AccountService {
 
         Account newAccount=new Account(username);
         accountRepository.save(newAccount);
-        return Optional.of(newAccount);
+        return Optional.of(new AccountDTO_gameIDs(newAccount));
     }
 }

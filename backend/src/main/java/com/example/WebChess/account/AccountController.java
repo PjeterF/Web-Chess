@@ -20,17 +20,17 @@ public class AccountController {
     }
 
     @GetMapping("/all")
-    public List<Account> getUsers(){
+    public List<AccountDTO_gameIDs> getUsers(){
         return accountService.getAll();
     }
 
-    @GetMapping("/")
-    public ResponseEntity<Account> getByUsername(@RequestParam String username){
+    @GetMapping("/{username}")
+    public ResponseEntity<AccountDTO_gameIDs> getByUsername(@PathVariable String username){
         if(username==null){
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
 
-        Optional<Account> account=accountService.getByUsername(username);
+        Optional<AccountDTO_gameIDs> account=accountService.getByUsername(username);
         if(account.isEmpty()){
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
@@ -39,16 +39,16 @@ public class AccountController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Account> createAccount(@RequestBody Map<String, String> body){
+    public ResponseEntity<AccountDTO_gameIDs> createAccount(@RequestBody Map<String, String> body){
         if(body.get("username")==null){
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
 
-        Optional<Account> account= accountService.createAccount(body.get("username"));
-        if(account.isEmpty()){
+        Optional<AccountDTO_gameIDs> accountDTO= accountService.createAccount(body.get("username"));
+        if(accountDTO.isEmpty()){
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<>(account.get(), HttpStatus.OK);
+        return new ResponseEntity<>(accountDTO.get(), HttpStatus.OK);
     }
 }

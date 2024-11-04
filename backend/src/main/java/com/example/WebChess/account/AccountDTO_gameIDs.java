@@ -1,19 +1,16 @@
 package com.example.WebChess.account;
 
 import com.example.WebChess.game.Game;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
-import jakarta.persistence.ManyToMany;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AccountDTO {
+public class AccountDTO_gameIDs {
     private Long id;
     private String username;
     private List<Long> gameIDs;
 
-    public AccountDTO(Account account) {
+    public AccountDTO_gameIDs(Account account) {
         this.id = account.getId();
         this.username = account.getUsername();
         List<Long> ids=new ArrayList<>();

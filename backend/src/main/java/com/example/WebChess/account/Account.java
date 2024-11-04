@@ -1,8 +1,10 @@
 package com.example.WebChess.account;
 
 import com.example.WebChess.game.Game;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -27,11 +29,13 @@ public class Account {
     public Account() {
         this.id = null;
         this.username = null;
-        this.games = null;
+        this.games = new ArrayList<>();
     }
 
     public Account(String username) {
         this.username = username;
+        this.id=null;
+        this.games = new ArrayList<>();
     }
 
     public Long getId() {

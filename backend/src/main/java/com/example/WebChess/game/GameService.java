@@ -22,7 +22,7 @@ public class GameService {
     }
 
     @Transactional
-    public Optional<Game> create(String username1, String username2){
+    public Optional<GameDTO_accountIDs> create(String username1, String username2){
         if(username1==null || username2==null){
             return Optional.empty();
         }
@@ -40,11 +40,11 @@ public class GameService {
         account1.get().getGames().add(saved);
         account2.get().getGames().add(saved);
 
-        return Optional.of(saved);
+        return Optional.of(new GameDTO_accountIDs(newGame));
     }
 
-    public List<Game> getAll() {
-        return gameRepository.findAll();
+    public List<GameDTO_accountIDs> getAll() {
+        return gameRepository.findAll().stream().map(GameDTO_accountIDs::new).toList();
     }
 
     @Transactional
@@ -58,10 +58,25 @@ public class GameService {
             return false;
         }
 
-        //char[][] array=FENtoArray(game.get().getBoardState());
-        //System.out.println(array);
+        boolean result=validateMove(startX, startY, targetX, targetY, game.get().getBoardState());
+        if(result){
+            StringBuilder builder=new StringBuilder(game.get().getBoardState());
+            int startIndex=coordToIndex(startX, startY);
+            int targetIndex=coordToIndex(targetX, targetY);
+            builder.setCharAt(targetIndex, builder.charAt(startIndex));
+            builder.setCharAt(startIndex, '.');
 
-        return true;
+            game.get().setBoardState(builder.toString());
+            if(game.get().isWhitesTurn()){
+                game.get().setWhitesTurn(false);
+            }else{
+                game.get().setWhitesTurn(true);
+            }
+            gameRepository.save(game.get());
+            return true;
+        }
+
+        return false;
     }
 
     private char[][] FENtoArray(String FEN){
@@ -109,8 +124,17 @@ public class GameService {
            case 'r'->{
                return validateRook(startX, startY, targetX, targetY, board);
            }
+           case 'k'->{
+                return validateKing(startX, startY, targetX, targetY, board);
+           }
            case 'n'->{
-
+               return validateKnight(startX, startY, targetX, targetY, board);
+           }
+           case 'b'->{
+               return validateBishop(startX, startY, targetX, targetY, board);
+           }
+           case 'q'->{
+               return validateQueen(startX, startY, targetX, targetY, board);
            }
        }
 
@@ -119,19 +143,19 @@ public class GameService {
 
     private boolean validatePawn(int startX, int startY, int targetX, int targetY, String board){
         if(Character.isLowerCase(board.charAt(coordToIndex(startX, startY)))){
-            if(board.charAt(coordToIndex(targetX, targetY))=='.' && targetX==startX && targetY==startY-1){
+            if(board.charAt(coordToIndex(targetX, targetY))=='.' && targetX==startX && targetY==startY+1){
                 return true;
-            }else if( board.charAt(coordToIndex(targetX, targetY))=='.' && startY==6 && targetY==4  && startX==targetX){
+            }else if( board.charAt(coordToIndex(targetX, targetY))=='.' && startY==1 && targetY==3  && startX==targetX){
                 return true;
-            }else if(Character.isUpperCase(board.charAt(coordToIndex(targetX, targetY))) && targetY==startY-1 && Math.abs(targetX-startX)==1){
+            }else if(Character.isUpperCase(board.charAt(coordToIndex(targetX, targetY))) && startY==targetY-1 && Math.abs(targetX-startX)==1){
                 return true;
             }
         }else{
-            if(board.charAt(coordToIndex(targetX, targetY))=='.' && targetX==startX && targetY==startY+1){
+            if(board.charAt(coordToIndex(targetX, targetY))=='.' && targetX==startX && targetY==startY-1){
                 return true;
-            }else if(board.charAt(coordToIndex(targetX, targetY))=='.' && startY==1 && targetY==3 && startX==targetX){
+            }else if(board.charAt(coordToIndex(targetX, targetY))=='.' && startY==6 && targetY==4 && startX==targetX){
                 return true;
-            }else if(Character.isUpperCase(board.charAt(coordToIndex(targetX, targetY))) && targetY==startY+1 && Math.abs(targetX-startX)==1){
+            }else if(Character.isLowerCase(board.charAt(coordToIndex(targetX, targetY))) && startY==targetY+1 && Math.abs(targetX-startX)==1){
                 return true;
             }
         }
@@ -139,29 +163,137 @@ public class GameService {
     }
 
     private boolean validateRook(int startX, int startY, int targetX, int targetY, String board){
-        if(!(startX == targetX || startY == targetY)){
-            return false;
-        }
-
-        if(startY==targetY){
+        if(startY==targetY && startX!=targetX){
             int offset=targetX<startX?-1:1;
-            for(int i=startX+offset;i<targetX;i+=offset){
+            for(int i=startX+offset;i!=targetX;i+=offset){
                 if(board.charAt(coordToIndex(i, startY))!='.'){
                     return false;
                 }
             }
-        }else if(startX==targetX){
+        }else if(startX==targetX && startY!=targetY){
             int offset=targetY<startY?-1:1;
-            for(int i=startY+offset;i<targetY;i+=offset){
+            for(int i=startY+offset;i!=targetY;i+=offset){
                 if(board.charAt(coordToIndex(startX, i))!='.'){
                     return false;
                 }
             }
+        }else{
+            return false;
         }
 
         char start=board.charAt(coordToIndex(startX, startY));
         char target=board.charAt(coordToIndex(targetX, targetY));
 
         return Character.isLowerCase(start) != Character.isLowerCase(target) || target == '.';
+    }
+
+    private boolean validateKing(int startX, int startY, int targetX, int targetY, String board){
+        int xDiff=Math.abs((startX-targetX));
+        int yDiff=Math.abs((startY-targetY));
+
+        if(xDiff==0 && yDiff==0){
+            return false;
+        }
+
+        if(xDiff>1 || yDiff>1){
+            return false;
+        }
+
+        char start=board.charAt(coordToIndex(startX, startY));
+        char target=board.charAt(coordToIndex(targetX, targetY));
+        if(target=='.'){
+            return true;
+        }
+        if(Character.isLowerCase(start)==Character.isLowerCase(target)){
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean validateKnight(int startX, int startY, int targetX, int targetY, String board){
+        class Coord{
+            public int x;
+            public int y;
+
+            public Coord(int x, int y) {
+                this.x = x;
+                this.y = y;
+            }
+        }
+
+        List<Coord> validPositions=new ArrayList<>();
+        validPositions.add(new Coord(startX+1, startY+2));
+        validPositions.add(new Coord(startX-1, startY+2));
+        validPositions.add(new Coord(startX+1, startY-2));
+        validPositions.add(new Coord(startX-1, startY-2));
+
+        validPositions.add(new Coord(startX+2, startY+1));
+        validPositions.add(new Coord(startX+2, startY-1));
+        validPositions.add(new Coord(startX-2, startY+1));
+        validPositions.add(new Coord(startX-2, startY-1));
+
+        boolean valid=false;
+        for(Coord coord : validPositions){
+            if(coord.x==targetX && coord.y==targetY){
+                valid=true;
+                break;
+            }
+        }
+
+        if(!valid){
+            return false;
+        }
+
+        char start=board.charAt(coordToIndex(startX, startY));
+        char target=board.charAt(coordToIndex(targetX, targetY));
+        if(target=='.'){
+            return true;
+        }
+        if(Character.isLowerCase(start)==Character.isLowerCase(target)){
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    private boolean validateBishop(int startX, int startY, int targetX, int targetY, String board){
+        int xDiff=Math.abs(startX-targetX);
+        int yDiff=Math.abs(startY-targetY);
+
+        if(xDiff==0 && yDiff==0){
+            return false;
+        }
+
+        if(xDiff!=yDiff){
+            return false;
+        }
+
+        int xOffset=startX<targetX?1:-1;
+        int yOffset=startY<targetY?1:-1;
+
+        int x=startX+xOffset, y=startY+yOffset;
+        while(x!=targetX && y!=targetY){
+            if(board.charAt(coordToIndex(x, y))!='.'){
+                return false;
+            }
+            x+=xOffset;
+            y+=yOffset;
+        }
+
+        char start=board.charAt(coordToIndex(startX, startY));
+        char target=board.charAt(coordToIndex(targetX, targetY));
+        if(target=='.'){
+            return true;
+        }
+        if(Character.isLowerCase(start)==Character.isLowerCase(target)){
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    private boolean validateQueen(int startX, int startY, int targetX, int targetY, String board){
+        return validateBishop(startX, startY, targetX, targetY, board) || validateRook(startX, startY, targetX, targetY, board);
     }
 }

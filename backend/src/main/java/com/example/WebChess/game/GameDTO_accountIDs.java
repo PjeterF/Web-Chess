@@ -1,18 +1,15 @@
 package com.example.WebChess.game;
 
-import com.example.WebChess.account.Account;
-import jakarta.persistence.ManyToMany;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class GameDTO_accountGameIds {
+public class GameDTO_accountIDs {
     private Long id;
     private String boardState;
     private List<Long> accountIDs;
     boolean whitesTurn=true;
 
-    public GameDTO_accountGameIds(Game game) {
+    public GameDTO_accountIDs(Game game) {
         this.id=game.getId();
         this.boardState=game.getBoardState();
         this.whitesTurn=game.isWhitesTurn();

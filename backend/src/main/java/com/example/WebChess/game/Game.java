@@ -68,4 +68,12 @@ public class Game {
     public void setBlackAccount(Account blackAccount) {
         this.accounts.set(1, blackAccount);
     }
+
+    public boolean isWhitesTurn() {
+        return whitesTurn;
+    }
+
+    public void setWhitesTurn(boolean whitesTurn) {
+        this.whitesTurn = whitesTurn;
+    }
 }
