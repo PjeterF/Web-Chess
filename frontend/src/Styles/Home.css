@@ -1,0 +1,19 @@
+:root{
+    --image-size: 160px;
+    --image-size2: 640px;
+}
+
+.image-container{
+    width: var(--image-size);
+    height: var(--image-size);
+    overflow: hidden;
+}
+
+.image1{
+    width: var(--image-size);
+    height: var(--image-size);
+    background-image: url('/public/pieces.png');
+    background-size: var(--image-size2) var(--image-size2);
+    background-position: 0px -160px;
+    background-repeat: no-repeat;
+}

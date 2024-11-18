@@ -1,23 +1,50 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useReducer, useState } from "react";
 import { useContext } from "react";
 
 const gameInitialValue={
-    id: 1,
-    boardState: "rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR",
-    accountIDs: [
-        1,
-        2
-    ],
-    whitesTurn: true
+    game:{
+        id: 1,
+        boardState: "rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR",
+        accountIDs: [
+            1,
+            2
+        ],
+        whitesTurn: true
+    }
+}
+
+function boardReducer(state, action){
+    switch(action.type){
+        case 'set board state':
+            return{
+                ...state,
+                game:{
+                    ...state.game,
+                    boardState:action.payload
+                }
+            }
+        case 'set game':
+            return{
+                ...state,
+                game:action.payload
+            }
+        case 'toggle turn':
+            return{
+                ...state,
+                game:{
+                    ...state.game,
+                    whitesTurn:!state.game.whitesTurn
+                }
+            }
+    }
 }
 
 const boardContext=createContext(null)
-
 function BoardContextProvider({children}){
-    const [contextGame, setContextGame]=useState(gameInitialValue)
+    const [boardContextValue, dispatch]=useReducer(boardReducer, gameInitialValue)
 
     return(
-        <boardContext.Provider value={{contextGame, setContextGame}}>
+        <boardContext.Provider value={{boardContextValue, dispatch}}>
             {children}
         </boardContext.Provider>
     )

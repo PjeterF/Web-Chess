@@ -1,16 +1,17 @@
 import React from "react";
-import Canvas from "../Components/Canvas";
+import ChessBoard from "../Components/ChessBoard";
 import "../Styles/Board.css"
 import { BoardContextProvider } from "../Components/BoardContextProvider";
+import GameList from "../Components/GameList";
+
 
 function Board(){
     return(
-        <BoardContextProvider>
-            <div className="Board">
-                <Canvas/>
-            </div>
-        </BoardContextProvider>
-        
+        <div className="Board">
+            <ChessBoard/>
+            <GameList></GameList>
+            
+        </div>
     )
 }
 

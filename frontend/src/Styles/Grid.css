@@ -1,0 +1,23 @@
+.grid-container{
+    display: grid;
+    grid-template-areas: 
+    "header header header header"
+    "left center center right"
+    ;
+}
+
+.grid-header{
+    grid-area: header;
+}
+
+.grid-left{
+    grid-area: left;
+}
+
+.grid-center{
+    grid-area: center;
+}
+
+.grid-right{
+    grid-area: right;
+}

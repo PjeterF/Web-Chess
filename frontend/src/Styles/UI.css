@@ -1,0 +1,25 @@
+.button{
+    border: 2px solid black;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 10s ease;
+    padding: 5px;
+    display: flex;
+    justify-content: center;
+}
+
+.button:hover{
+    filter: brightness(1.1);
+}
+
+.button-green{
+    background: linear-gradient(90deg, #5bda4b, #38b95f);
+}
+
+.button-blue{
+    background: linear-gradient(90deg, #449fc9, #3851a5);
+}
+
+.button-red{
+    background: linear-gradient(90deg, #e04848, #b81a1a);
+}

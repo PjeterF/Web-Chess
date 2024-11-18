@@ -2,6 +2,7 @@ package com.example.WebChess.game;
 
 import com.example.WebChess.account.Account;
 import com.example.WebChess.account.AccountRepository;
+import com.example.WebChess.chess.ChessEvaluator;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,34 @@ public class GameService {
         return gameRepository.findAll().stream().map(GameDTO_accountIDs::new).toList();
     }
 
+    public Optional<GameDTO_accountIDs> getGameById(Long id){
+        Optional<Game> game=gameRepository.findById(id);
+        if(game.isPresent()){
+            return Optional.of(new GameDTO_accountIDs(game.get()));
+        }else{
+            return Optional.empty();
+        }
+    }
+
+    @Transactional
+    public String makeAComputerMove(Long gameId, boolean white, int depth){
+        Optional<Game> game=gameRepository.findById(gameId);
+        if(game.isEmpty()){
+            throw new RuntimeException("Could not find game");
+        }
+
+        ChessEvaluator evaluator=new ChessEvaluator(game.get().getBoardState());
+        String[] move=new String[2];
+        evaluator.minimax(depth, white, move, Integer.MIN_VALUE, Integer.MAX_VALUE);
+
+        evaluator.makeAMove(move[0], move[1]);
+        game.get().setBoardState(evaluator.getBoardString());
+        game.get().setWhitesTurn(!white);
+        gameRepository.save(game.get());
+
+        return game.get().getBoardState();
+    }
+
     @Transactional
     public boolean makeAMove(Long gameId, int startX, int startY, int targetX, int targetY){
         if(startX<0 || startY>=8 || startY<0 || startY>=8){
@@ -55,6 +84,17 @@ public class GameService {
 
         Optional<Game> game=gameRepository.findById(gameId);
         if(game.isEmpty()){
+            return false;
+        }
+
+        char piece=game.get().getBoardState().charAt(coordToIndex(startX, startY));
+        if(piece=='.'){
+            return false;
+        }
+        if(Character.isLowerCase(piece) && game.get().isWhitesTurn()){
+            return false;
+        }
+        if(Character.isUpperCase(piece) && !game.get().isWhitesTurn()){
             return false;
         }
 

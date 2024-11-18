@@ -1,14 +1,15 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useRef } from "react";
 import "../Styles/Canvas.css"
+import "../Styles/UI.css"
 import { boardContext } from "./BoardContextProvider";
 
-function Canvas(){
+function ChessBoard(){
     const canvasRef=useRef(null)
     const cellSize=80;
     const pieceSize=64
-    const [board, setBoard]=useState('rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR')
     const [selectedCell, setSelectedCell]=useState(null)
+    const [turnText, setTurnText]=useState('White\'s turn')
 
     const image=new Image()
     image.src='/pieces.png'
@@ -27,23 +28,30 @@ function Canvas(){
     piecesMap.set('q', [64, 16, 16, 16])
     piecesMap.set('k', [80, 16, 16, 16])
 
-    const {contextGame, setContextGame}=useContext(boardContext)
+    const {boardContextValue, dispatch}=useContext(boardContext)
 
     function coordToIndex(x, y){
         return x+y*8
     }
 
     function movePiece(startX, startY, targetX, targetY){
+        const board=boardContextValue.game.boardState
+
         const startIndex=coordToIndex(startX, startY)
         const targetIndex=coordToIndex(targetX, targetY)
 
         let newBoard=board.slice(0, targetIndex)+board[startIndex]+board.slice(targetIndex+1)
         newBoard=newBoard.slice(0, startIndex)+'.'+newBoard.slice(startIndex+1)
 
-        setBoard(newBoard)
+        dispatch({
+            type:'set board state',
+            payload:newBoard
+        })
     }
 
     async function handleClick(e){
+        const board=boardContextValue.game.boardState
+
         const rect=e.currentTarget.getBoundingClientRect()
         const x=e.clientX-rect.left
         const y=e.clientY-rect.top
@@ -62,11 +70,13 @@ function Canvas(){
             const response=await fetch('http://localhost:8080/api/game/move', {
                 method:'POST',
                 headers:{'Content-Type':'application/json'},
-                body: JSON.stringify({gameID:1, start:selectedCell, target:newSelectedCell})
+                body: JSON.stringify({gameID:boardContextValue.game.id, start:selectedCell, target:newSelectedCell})
             })
 
             if(response.ok){
                 movePiece(selectedCell[0], selectedCell[1], newSelectedCell[0], newSelectedCell[1])
+            }else{
+                alert("Invalid move")
             }
 
             setSelectedCell(null)
@@ -74,6 +84,8 @@ function Canvas(){
     }
 
     useEffect(()=>{
+        const board=boardContextValue.game.boardState
+
         const canvas=canvasRef.current
         const context=canvas.getContext('2d')
 
@@ -84,7 +96,7 @@ function Canvas(){
             for(let i=0;i<8;i++){
                 for(let j=0;j<8;j++){
                     if((i+j)%2===0){
-                        context.fillStyle = '#070706';
+                        context.fillStyle = '#555555';
                     }else{
                         context.fillStyle = '#F8F8F2';
                     }
@@ -113,13 +125,32 @@ function Canvas(){
                 }
             }
         }
-    },[board, selectedCell])
+    },[boardContextValue.game.boardState, selectedCell])
+
+    async function makeComputerMove(){
+        const response=await fetch('http://localhost:8080/api/game/computerMove',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({gameID:boardContextValue.game.id, depth:6, white:false})
+        })
+
+        if(response.ok){
+            const data=await response.json()
+            dispatch({
+                type:'set board state',
+                payload:data.newBoardState
+            })
+        }else{
+            alert("Error making computer move")
+        }
+    }
 
     return(
         <div>
+            <div className="button button-red" onClick={makeComputerMove}>Move black</div>
             <canvas onClick={handleClick} className="canvas" width={cellSize*8} height={cellSize*8} ref={canvasRef}/>
         </div>
     )
 }
 
-export default Canvas
+export default ChessBoard

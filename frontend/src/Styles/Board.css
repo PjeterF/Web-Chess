@@ -1,4 +1,9 @@
 .Board{
     width: 50vw;
     height: 50vh;
+    max-width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: row;
 }

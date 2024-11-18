@@ -3,7 +3,10 @@ package com.example.WebChess.game;
 import com.example.WebChess.account.Account;
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -21,20 +24,43 @@ public class Game {
     )
     private Long id;
     private String boardState;
+
+    public LocalDateTime getCreated() {
+        return created;
+    }
+
+    public void setCreated(LocalDateTime created) {
+        this.created = created;
+    }
+
+    public LocalDateTime getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(LocalDateTime lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
     @ManyToMany
     private List<Account> accounts;
     boolean whitesTurn=true;
+    LocalDateTime created;
+    LocalDateTime lastUpdate;
 
     public Game(String boardState, Account whiteAccount, Account blackAccount) {
         this.boardState = boardState;
         accounts=new ArrayList<>();
         accounts.add(whiteAccount);
         accounts.add(blackAccount);
+        created=LocalDateTime.now();
+        lastUpdate=LocalDateTime.now();
     }
 
     public Game() {
         boardState="";
         accounts=new ArrayList<>();
+        created=LocalDateTime.now();
+        lastUpdate=LocalDateTime.now();
     }
 
     public Long getId() {

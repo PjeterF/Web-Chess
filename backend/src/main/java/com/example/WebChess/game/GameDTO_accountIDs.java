@@ -1,5 +1,6 @@
 package com.example.WebChess.game;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +9,8 @@ public class GameDTO_accountIDs {
     private String boardState;
     private List<Long> accountIDs;
     boolean whitesTurn=true;
+    LocalDateTime created;
+    LocalDateTime lastUpdate;
 
     public GameDTO_accountIDs(Game game) {
         this.id=game.getId();
@@ -16,6 +19,24 @@ public class GameDTO_accountIDs {
         this.accountIDs=new ArrayList<>();
         this.accountIDs.add(game.getWhiteAccount().getId());
         this.accountIDs.add(game.getBlackAccount().getId());
+        this.created=game.getCreated();
+        this.lastUpdate=game.getLastUpdate();
+    }
+
+    public LocalDateTime getCreated() {
+        return created;
+    }
+
+    public void setCreated(LocalDateTime created) {
+        this.created = created;
+    }
+
+    public LocalDateTime getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(LocalDateTime lastUpdate) {
+        this.lastUpdate = lastUpdate;
     }
 
     public Long getId() {

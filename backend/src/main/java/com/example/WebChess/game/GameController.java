@@ -1,7 +1,8 @@
 package com.example.WebChess.game;
 
+import com.example.WebChess.game.requests.ComputerMoveRequest;
 import com.example.WebChess.game.requests.MoveRequest;
-import com.example.WebChess.game.responses.MoveResponse;
+import com.example.WebChess.game.responses.ComputerMoveResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,16 @@ public class GameController {
         return gameService.getAll();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<GameDTO_accountIDs> getById(@PathVariable Long id){
+        Optional<GameDTO_accountIDs> game=gameService.getGameById(id);
+        if(game.isEmpty()){
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(game.get(), HttpStatus.OK);
+    }
+
     @PostMapping("/create")
     public ResponseEntity<GameDTO_accountIDs> create(@RequestBody Map<String, String> body){
         String username1=body.get("username1");
@@ -43,7 +54,6 @@ public class GameController {
         return new ResponseEntity<>(game.get(), HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/move")
     public ResponseEntity<String> move(@RequestBody MoveRequest request){
         if(request.getGameID()==null || request.getStart()==null || request.getTarget()==null || request.getStart().size()!=2 || request.getTarget().size()!=2){
@@ -59,4 +69,17 @@ public class GameController {
         return new ResponseEntity<>("Valid move", HttpStatus.OK);
     }
 
+    @PostMapping("/computerMove")
+    public ResponseEntity<ComputerMoveResponse> computerMove(@RequestBody ComputerMoveRequest request) {
+        if(request.getGameID()==null || request.getDepth()<1){
+            return new ResponseEntity<>(new ComputerMoveResponse(""), HttpStatus.BAD_REQUEST);
+        }
+
+        try{
+            String newBoardState=gameService.makeAComputerMove(request.getGameID(), request.getWhite(), request.getDepth());
+            return new ResponseEntity<>(new ComputerMoveResponse(newBoardState), HttpStatus.OK);
+        }catch (Exception error){
+            return new ResponseEntity<>(new ComputerMoveResponse(""), HttpStatus.NOT_FOUND);
+        }
+    }
 }
