@@ -1,0 +1,46 @@
+.ChessBoard{
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 5px;
+    background-color: rgb(37, 37, 37);
+    cursor: pointer;
+    padding: 15px;
+}
+
+.TurnBox{
+    border: 2px solid black;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 5px;
+    width: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ComputerThinkingBox{
+    outline-style: solid;
+    outline-width: 5px;
+    outline-offset: 0px;
+    animation: outlineMovingOutwards 2s linear infinite;
+}
+
+@keyframes outlineMovingOutwards{
+    0%{
+        outline-width: 0px;
+        outline-offset: 0px;
+        outline-color: rgba(255, 0, 0, 0);
+    }
+
+    50%{
+        outline-width: 5px;
+        outline-offset: 1px;
+        outline-color: rgb(113, 63, 230);
+    }
+
+    100%{
+        outline-width: 0px;
+        outline-offset: 0px;
+        outline-color: rgba(255, 0, 0, 0);
+    }
+}
