@@ -71,6 +71,26 @@ public class ChessEvaluator {
         }
     }
 
+    public boolean validateMove(int startX, int startY, int targetX, int targetY){
+        var validMoves=getValidMoves(startX, startY);
+        for(var move : validMoves){
+            if(move.equals(encodePosition(targetX, targetY))){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean validateMove(String start, String target){
+        var validMoves=getValidMoves(start);
+        for(var move : validMoves){
+            if(move.equals(target)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public Collection<String> getValidMoves(int x, int y){
         if(x<0 || x>7 || y<0 || y>7){
             throw new IllegalArgumentException("Position out of bounds");

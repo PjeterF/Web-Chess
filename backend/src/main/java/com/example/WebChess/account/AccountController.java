@@ -1,16 +1,17 @@
 package com.example.WebChess.account;
 
+import com.example.WebChess.account.exceptions.AccountRetrievalException;
+import com.example.WebChess.account.requests.CreateAccountRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping(path = "/api/account")
+@RequestMapping(path = "/api/accounts")
 public class AccountController {
     private final AccountService accountService;
 
@@ -19,36 +20,36 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    @GetMapping("/all")
+    @GetMapping("")
     public List<AccountDTO_gameIDs> getUsers(){
         return accountService.getAll();
     }
 
     @GetMapping("/{username}")
-    public ResponseEntity<AccountDTO_gameIDs> getByUsername(@PathVariable String username){
-        if(username==null){
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?> getByUsername(@PathVariable String username){
+        try{
+            AccountDTO_gameIDs account=accountService.getByUsername(username);
+            return new ResponseEntity<>(account, HttpStatus.OK);
+        }catch (AccountRetrievalException exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
+        }catch (IllegalArgumentException exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        }catch (Exception exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        Optional<AccountDTO_gameIDs> account=accountService.getByUsername(username);
-        if(account.isEmpty()){
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
-
-        return new ResponseEntity<>(account.get(), HttpStatus.OK);
     }
 
-    @PostMapping("/")
-    public ResponseEntity<AccountDTO_gameIDs> createAccount(@RequestBody Map<String, String> body){
-        if(body.get("username")==null){
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    @PostMapping("")
+    public ResponseEntity<?> createAccount(@RequestBody CreateAccountRequest request){
+        try{
+            AccountDTO_gameIDs account=accountService.createAccount(request.getUsername(), request.getPassword(), request.getRole());
+            return new ResponseEntity<>(account, HttpStatus.CREATED);
+        }catch (AccountRetrievalException exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.CONFLICT);
+        }catch (IllegalArgumentException exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        }catch (Exception exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        Optional<AccountDTO_gameIDs> accountDTO= accountService.createAccount(body.get("username"));
-        if(accountDTO.isEmpty()){
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
-
-        return new ResponseEntity<>(accountDTO.get(), HttpStatus.OK);
     }
 }

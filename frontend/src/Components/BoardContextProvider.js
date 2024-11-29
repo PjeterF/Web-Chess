@@ -9,8 +9,11 @@ const gameInitialValue={
             1,
             2
         ],
-        whitesTurn: true
-    }
+        whitesTurn: true,
+        whiteIsAutomated:false,
+        blackIsAutomated:false
+    },
+    processingMove:false
 }
 
 function boardReducer(state, action){
@@ -35,6 +38,11 @@ function boardReducer(state, action){
                     ...state.game,
                     whitesTurn:!state.game.whitesTurn
                 }
+        }
+        case 'toggle process move':
+            return{
+                ...state,
+                processingMove:!state.processingMove
             }
     }
 }

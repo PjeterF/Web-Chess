@@ -1,15 +1,17 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useRef } from "react";
-import "../Styles/Canvas.css"
+import "../Styles/ChessBoard.css"
 import "../Styles/UI.css"
 import { boardContext } from "./BoardContextProvider";
+
+import { makeComputerMove, movePiece } from "../Utility/APICalls";
 
 function ChessBoard(){
     const canvasRef=useRef(null)
     const cellSize=80;
     const pieceSize=64
     const [selectedCell, setSelectedCell]=useState(null)
-    const [turnText, setTurnText]=useState('White\'s turn')
+    const [processingMove, setProcessingMove]=useState(false)
 
     const image=new Image()
     image.src='/pieces.png'
@@ -34,18 +36,24 @@ function ChessBoard(){
         return x+y*8
     }
 
-    function movePiece(startX, startY, targetX, targetY){
-        const board=boardContextValue.game.boardState
-
-        const startIndex=coordToIndex(startX, startY)
-        const targetIndex=coordToIndex(targetX, targetY)
-
-        let newBoard=board.slice(0, targetIndex)+board[startIndex]+board.slice(targetIndex+1)
-        newBoard=newBoard.slice(0, startIndex)+'.'+newBoard.slice(startIndex+1)
-
+    async function handleComputerMove(white){
         dispatch({
-            type:'set board state',
-            payload:newBoard
+            type:'toggle process move',
+            payload:null
+        })
+
+        const game=await makeComputerMove(boardContextValue.game.id, white, 6)
+        if(game!=null){
+            dispatch({
+                type:'set game',
+                payload:game
+            })
+        }else{
+            alert("Error making computer move")
+        }
+        dispatch({
+            type:'toggle process move',
+            payload:null
         })
     }
 
@@ -66,24 +74,22 @@ function ChessBoard(){
             }
         }else{
             const newSelectedCell=[Math.floor(x/cellSize), Math.floor(y/cellSize)]
-
-            const response=await fetch('http://localhost:8080/api/game/move', {
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                body: JSON.stringify({gameID:boardContextValue.game.id, start:selectedCell, target:newSelectedCell})
-            })
-
-            if(response.ok){
-                movePiece(selectedCell[0], selectedCell[1], newSelectedCell[0], newSelectedCell[1])
+    
+            const game=await movePiece(boardContextValue.game.id, selectedCell[0], selectedCell[1], newSelectedCell[0], newSelectedCell[1])
+            if(game!=null){
+                dispatch({
+                    type:'set game',
+                    payload:game
+                })
+                console.log(game)
             }else{
                 alert("Invalid move")
             }
-
             setSelectedCell(null)
         }
     }
 
-    useEffect(()=>{
+    function drawBoard(){
         const board=boardContextValue.game.boardState
 
         const canvas=canvasRef.current
@@ -125,30 +131,56 @@ function ChessBoard(){
                 }
             }
         }
+    }
+
+    useEffect(()=>{
+        drawBoard();
     },[boardContextValue.game.boardState, selectedCell])
 
-    async function makeComputerMove(){
-        const response=await fetch('http://localhost:8080/api/game/computerMove',{
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({gameID:boardContextValue.game.id, depth:6, white:false})
-        })
-
-        if(response.ok){
-            const data=await response.json()
-            dispatch({
-                type:'set board state',
-                payload:data.newBoardState
-            })
-        }else{
-            alert("Error making computer move")
+    useEffect(()=>{
+        async function moveAutonomously(){
+            if(boardContextValue.game.whitesTurn && boardContextValue.game.whiteIsAutomated){
+                setProcessingMove(true)
+                await handleComputerMove(true)
+            }
+            if(!boardContextValue.game.whitesTurn && boardContextValue.game.blackIsAutomated){
+                setProcessingMove(true)
+                await handleComputerMove(false)
+            }
+            setProcessingMove(false)
         }
+
+        moveAutonomously()
+    },[boardContextValue.game.whitesTurn])
+
+    const turnBoxColor={
+        backgroundColor:boardContextValue.game.whitesTurn?'#F8F8F2':'#222222',
+        color:boardContextValue.game.whitesTurn?'#222222':'#F8F8F2',
+        borderColor:boardContextValue.game.whitesTurn?'#222222':'#F8F8F2',
+    }
+
+    function infoBox(){
+        return({
+
+        })
     }
 
     return(
-        <div>
-            <div className="button button-red" onClick={makeComputerMove}>Move black</div>
-            <canvas onClick={handleClick} className="canvas" width={cellSize*8} height={cellSize*8} ref={canvasRef}/>
+        <div style={{display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
+            {/*
+                {boardContextValue.game.whiteIsAutomated?<div>White is automated</div>:<div>White is not automated</div>}
+                {boardContextValue.game.blackIsAutomated?<div>Black is automated</div>:<div>Black is not automated</div>}
+            */}
+            {
+                processingMove?(
+                    <div style={turnBoxColor} className="TurnBox ComputerThinkingBox">Thinking</div>
+                ):(
+                    <div style={turnBoxColor} className="TurnBox">{boardContextValue.game.whitesTurn?'White\'s turn':'Black\'s turn'}</div>
+                )        
+            }
+            <div className="ChessBoard">
+                <canvas onClick={handleClick}  width={cellSize*8} height={cellSize*8} ref={canvasRef}/>
+            </div>
         </div>
     )
 }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useContext } from "react";
 import { boardContext } from "./BoardContextProvider";
+import GameInfoBox from "./GameInfoBox";
 
 function GameList(){
     const username='User1'
@@ -10,10 +11,10 @@ function GameList(){
     useEffect(()=>{
         async function fetchGameListOfUser(username){
             try{
-                const response=await fetch('http://localhost:8080/api/account/'+username)
+                const response=await fetch('http://localhost:8080/api/games/username/'+username)
                 if(response.ok){
                     const data=await response.json()
-                    setList(data.gameIDs)
+                    setList(data)
                 }
             }catch(error){
                 console.log(error)
@@ -21,19 +22,13 @@ function GameList(){
         }
 
         fetchGameListOfUser(username)
-    }, [])
-
-    function selectGame(gameID){
-        
-    }
+    }, [boardContextValue.game.id])
 
     return(
-        <div>
-            <ul>
-                {list.map((gameID, index)=>(
-                <li key={index}>{gameID}</li>
-                ))}
-            </ul>
+        <div style={{height:'100%', width:'auto', overflow:'scroll', overflowX:'hidden'}}>
+            {list.map((game, index)=>(
+            <GameInfoBox key={index} gameID={game.id} created={game.created} lastUpdate={game.lastUpdate}/>
+            ))}
         </div> 
     )
 }

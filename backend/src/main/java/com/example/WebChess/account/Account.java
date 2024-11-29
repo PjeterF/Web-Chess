@@ -3,8 +3,11 @@ package com.example.WebChess.account;
 import com.example.WebChess.game.Game;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -21,29 +24,29 @@ public class Account {
             generator = "account_sequence"
     )
     private Long id;
-    @Column(unique = true, nullable = false)
-    private String username;
     @ManyToMany(mappedBy = "accounts")
     private List<Game> games;
+    @Column(name = "username", unique = true)
+    private String username;
+    private String password;
+    private String role;
 
     public Account() {
         this.id = null;
-        this.username = null;
         this.games = new ArrayList<>();
     }
 
     public Account(String username) {
-        this.username = username;
         this.id=null;
         this.games = new ArrayList<>();
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    public Account(String username, String password, String role){
+        this.username=username;
+        this.password=password;
+        this.role=role;
+        this.id=null;
+        this.games = new ArrayList<>();
     }
 
     public String getUsername() {
@@ -52,6 +55,30 @@ public class Account {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public List<Game> getGames() {
@@ -66,7 +93,6 @@ public class Account {
     public String toString() {
         return "Account{" +
                 "id=" + id +
-                ", username='" + username + '\'' +
                 ", games=" + games +
                 '}';
     }

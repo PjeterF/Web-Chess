@@ -1,12 +1,11 @@
 package com.example.WebChess.game;
 
 import com.example.WebChess.account.Account;
+import com.example.WebChess.move.Move;
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -24,6 +23,53 @@ public class Game {
     )
     private Long id;
     private String boardState;
+    @ManyToMany
+    private List<Account> accounts;
+    @OneToMany
+    private List<Move> moves;
+    boolean whitesTurn=true;
+    private LocalDateTime created;
+    private LocalDateTime lastUpdate;
+    private Boolean whiteIsAutomated =false;
+    private Boolean blackIsAutomated =false;
+    private Integer difficulty=4;
+    private String result="Ongoing";
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
+    }
+
+    public void toggleTurn(){
+        whitesTurn=!whitesTurn;
+    }
+
+    public Integer getDifficulty() {
+        return difficulty;
+    }
+
+    public void setDifficulty(Integer difficulty) {
+        this.difficulty = difficulty;
+    }
+
+    public Boolean getWhiteIsAutomated() {
+        return whiteIsAutomated;
+    }
+
+    public void setWhiteIsAutomated(Boolean whiteIsAutomated) {
+        this.whiteIsAutomated = whiteIsAutomated;
+    }
+
+    public Boolean getBlackIsAutomated() {
+        return blackIsAutomated;
+    }
+
+    public void setBlackIsAutomated(Boolean blackIsAutomated) {
+        this.blackIsAutomated = blackIsAutomated;
+    }
 
     public LocalDateTime getCreated() {
         return created;
@@ -41,19 +87,17 @@ public class Game {
         this.lastUpdate = lastUpdate;
     }
 
-    @ManyToMany
-    private List<Account> accounts;
-    boolean whitesTurn=true;
-    LocalDateTime created;
-    LocalDateTime lastUpdate;
-
-    public Game(String boardState, Account whiteAccount, Account blackAccount) {
+    public Game(String boardState, Account whiteAccount, Account blackAccount, boolean whiteIsAutomated, boolean blackIsAutomated, int difficulty) {
         this.boardState = boardState;
         accounts=new ArrayList<>();
         accounts.add(whiteAccount);
         accounts.add(blackAccount);
         created=LocalDateTime.now();
         lastUpdate=LocalDateTime.now();
+        this.whiteIsAutomated = whiteIsAutomated;
+        this.blackIsAutomated = blackIsAutomated;
+        this.difficulty=difficulty;
+        moves=new ArrayList<>();
     }
 
     public Game() {
@@ -61,6 +105,7 @@ public class Game {
         accounts=new ArrayList<>();
         created=LocalDateTime.now();
         lastUpdate=LocalDateTime.now();
+        moves=new ArrayList<>();
     }
 
     public Long getId() {
@@ -101,5 +146,13 @@ public class Game {
 
     public void setWhitesTurn(boolean whitesTurn) {
         this.whitesTurn = whitesTurn;
+    }
+
+    public List<Move> getMoves() {
+        return moves;
+    }
+
+    public void setMoves(List<Move> moves) {
+        this.moves = moves;
     }
 }

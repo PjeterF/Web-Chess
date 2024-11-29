@@ -17,3 +17,23 @@
     background-position: 0px -160px;
     background-repeat: no-repeat;
 }
+
+.home-container{
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.home-sub-container{
+    border: 3px solid #344355;
+    border-radius: 5px;
+    height: 20%;
+    padding: 10px;
+    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}

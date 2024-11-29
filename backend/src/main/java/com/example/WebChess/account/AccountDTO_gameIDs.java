@@ -9,10 +9,13 @@ public class AccountDTO_gameIDs {
     private Long id;
     private String username;
     private List<Long> gameIDs;
+    private String role;
 
     public AccountDTO_gameIDs(Account account) {
         this.id = account.getId();
         this.username = account.getUsername();
+        this.role=account.getRole();
+
         List<Long> ids=new ArrayList<>();
         for(Game game : account.getGames()){
             ids.add(game.getId());
@@ -42,5 +45,13 @@ public class AccountDTO_gameIDs {
 
     public void setGameIDs(List<Long> gameIDs) {
         this.gameIDs = gameIDs;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

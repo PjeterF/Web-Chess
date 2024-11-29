@@ -6,10 +6,12 @@ import { useContext } from "react";
 import { boardContext } from "../Components/BoardContextProvider";
 import ChessBoard from "../Components/ChessBoard";
 import GameList from "../Components/GameList";
-import '../Styles/Grid.css'
+import GameSettings from "../Components/GameSettings";
+
+import { createGame } from "../Utility/APICalls";
 
 function Home(){
-     const {boardContextValue, dispatch}=useContext(boardContext)
+    const {boardContextValue, dispatch}=useContext(boardContext)
     const navigate=useNavigate()
 
     async function onHost(){
@@ -21,43 +23,33 @@ function Home(){
     }
 
     async function playOffline(){
-        const response=await fetch('http://localhost:8080/api/game/create', {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({
-                username1:"User1",
-                username2:"User2"
-            })
-        })
-
-        const data=await response.json()
-
-        if(response.ok){
+        const game=await createGame('User1', 'Computer', false, true)
+        if(game!=null){
             dispatch({
                 type:'set game',
-                payload:data
+                payload:game
             })
-            navigate('/board')
-            console.log(data)
+            navigate('/game')
         }
     }
 
-    return(
-        <div className="grid-container">
-            <div className="grid-header">
+    const buttonStyle={
+        margin:'4px',
+        width:'140px'
+    }
 
+    return(
+        <div className="home-container">
+            <div className="home-sub-container">
+            <div className="button button-ash" style={buttonStyle}>Login</div>
+            <div className="button button-khaki" style={buttonStyle}>Create account</div>
             </div>
-            <div className="grid-left">
-                <div className="button button-red" onClick={onHost}>Host game</div>
-                <div className="button button-green" onClick={onJoin}>Join game</div>
-                <div className="button button-blue" onClick={playOffline}>Play offline</div>
+            <div className="home-sub-container">
+                <div className="button button-gray" onClick={playOffline} style={buttonStyle}>Play agaist computer</div>
+                <div className="button button-ash" style={buttonStyle}>Host game</div>
+                <div className="button button-khaki" style={buttonStyle}>Join game</div>
             </div>
-            <div className="grid-center">
-                <ChessBoard/>
-            </div>
-            <div className="grid-right">
-                <GameList/>
-            </div>
+            <GameSettings/>
         </div>
     )
 }

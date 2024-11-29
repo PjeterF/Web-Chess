@@ -7,6 +7,15 @@ public class MoveRequest {
     private List<Integer> start;
     private List<Integer> target;
 
+    public MoveRequest(Long gameID, List<Integer> start, List<Integer> target) {
+        this.gameID = gameID;
+        this.start = start;
+        this.target = target;
+    }
+
+    public MoveRequest() {
+    }
+
     public Long getGameID() {
         return gameID;
     }

@@ -2,10 +2,20 @@ package com.example.WebChess.game;
 
 import com.example.WebChess.account.Account;
 import com.example.WebChess.account.AccountRepository;
+import com.example.WebChess.account.exceptions.AccountRetrievalException;
 import com.example.WebChess.chess.ChessEvaluator;
+import com.example.WebChess.game.exceptions.GameRetrievalException;
+import com.example.WebChess.game.exceptions.IllegalTileSelectinException;
+import com.example.WebChess.game.exceptions.InvalidBoardOperationException;
+import com.example.WebChess.game.requests.ComputerMoveRequest;
+import com.example.WebChess.game.requests.MoveRequest;
+import com.example.WebChess.game.requests.UndoMoveRequest;
+import com.example.WebChess.move.Move;
+import com.example.WebChess.move.MoveRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,108 +25,205 @@ import java.util.Optional;
 public class GameService {
     private GameRepository gameRepository;
     private AccountRepository accountRepository;
+    private MoveRepository moveRepository;
 
     @Autowired
-    public GameService(GameRepository gameRepository, AccountRepository accountRepository) {
+    public GameService(GameRepository gameRepository, AccountRepository accountRepository, MoveRepository moveRepository) {
         this.gameRepository = gameRepository;
         this.accountRepository=accountRepository;
+        this.moveRepository=moveRepository;
     }
 
     @Transactional
-    public Optional<GameDTO_accountIDs> create(String username1, String username2){
+    public GameDTO create(String username1, String username2, boolean whiteAutomated, boolean blackAutomated, int difficulty){
         if(username1==null || username2==null){
-            return Optional.empty();
+            throw new IllegalArgumentException("At least one username was null");
         }
 
         Optional<Account> account1=accountRepository.findByUsername(username1);
         Optional<Account> account2=accountRepository.findByUsername(username2);
 
         if(account1.isEmpty() || account2.isEmpty()){
-            return Optional.empty();
+            throw new AccountRetrievalException("Could not find at least one account");
         }
 
-        Game newGame=new Game("rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR", account1.get(), account2.get());
+        Game newGame=new Game("rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR", account1.get(), account2.get(), whiteAutomated, blackAutomated, difficulty);
         Game saved=gameRepository.save(newGame);
 
         account1.get().getGames().add(saved);
         account2.get().getGames().add(saved);
 
-        return Optional.of(new GameDTO_accountIDs(newGame));
+        return new GameDTO(newGame);
     }
 
-    public List<GameDTO_accountIDs> getAll() {
-        return gameRepository.findAll().stream().map(GameDTO_accountIDs::new).toList();
+    public List<GameDTO> getAll() {
+        return gameRepository.findAll().stream().map(GameDTO::new).toList();
     }
 
-    public Optional<GameDTO_accountIDs> getGameById(Long id){
-        Optional<Game> game=gameRepository.findById(id);
-        if(game.isPresent()){
-            return Optional.of(new GameDTO_accountIDs(game.get()));
-        }else{
-            return Optional.empty();
+    public GameDTO getGameById(Long id){
+        if(id==null){
+            throw new IllegalArgumentException("Missing parameters");
         }
+
+        Optional<Game> game=gameRepository.findById(id);
+        if(game.isEmpty()){
+            throw new AccountRetrievalException("Could not find game");
+        }
+        return new GameDTO(game.get());
+    }
+
+    public List<GameDTO> getGamesOfUser(String username){
+        if(username==null){
+            throw new IllegalArgumentException("Missing parameters");
+        }
+
+        Optional<Account> accountOptional=accountRepository.findByUsername(username);
+        if(accountOptional.isEmpty()){
+            throw new AccountRetrievalException("Account does not exist");
+        }
+
+        List<GameDTO> result=new ArrayList<>();
+        for(Game game : accountOptional.get().getGames()){
+            result.add(new GameDTO(game));
+        }
+
+        return result;
     }
 
     @Transactional
-    public String makeAComputerMove(Long gameId, boolean white, int depth){
-        Optional<Game> game=gameRepository.findById(gameId);
+    public Game makeAComputerMove(ComputerMoveRequest computerMoveRequest){
+        if(computerMoveRequest.getGameID()==null || computerMoveRequest.getWhite()==null || computerMoveRequest.getDepth()==null){
+            throw new IllegalArgumentException("Missing parameters");
+        }
+
+        if(computerMoveRequest.getDepth()<1){
+            throw new IllegalArgumentException("Invalid depth value; must be greater than 0");
+        }
+
+        Optional<Game> game=gameRepository.findById(computerMoveRequest.getGameID());
         if(game.isEmpty()){
-            throw new RuntimeException("Could not find game");
+            throw new GameRetrievalException("Could not find game");
         }
 
         ChessEvaluator evaluator=new ChessEvaluator(game.get().getBoardState());
         String[] move=new String[2];
-        evaluator.minimax(depth, white, move, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        evaluator.minimax(computerMoveRequest.getDepth(), computerMoveRequest.getWhite(), move, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
         evaluator.makeAMove(move[0], move[1]);
         game.get().setBoardState(evaluator.getBoardString());
-        game.get().setWhitesTurn(!white);
+        game.get().setWhitesTurn(!computerMoveRequest.getWhite());
+
+        List<Move> gameMoves=game.get().getMoves();
+        Move newMove=new Move(move[0]+move[1], game.get());
+        moveRepository.save(newMove);
+
+        gameMoves.add(newMove);
+        game.get().setMoves(gameMoves);
         gameRepository.save(game.get());
 
-        return game.get().getBoardState();
+        return game.get();
     }
 
     @Transactional
-    public boolean makeAMove(Long gameId, int startX, int startY, int targetX, int targetY){
-        if(startX<0 || startY>=8 || startY<0 || startY>=8){
-            return false;
+    public Game makeAMove(MoveRequest moveRequest){
+        if(moveRequest.getStart()==null){
+            throw new IllegalArgumentException("Starting coordinate was null");
+        }
+        if(moveRequest.getTarget()==null){
+            throw new IllegalArgumentException("Target coordinate was null");
+        }
+        if(moveRequest.getStart().get(0)<0 || moveRequest.getStart().get(0)>=8 || moveRequest.getStart().get(1)<0 || moveRequest.getStart().get(1)>=8){
+            throw new IllegalArgumentException("Starting coordinate is out of bounds");
+        }
+        if(moveRequest.getTarget().get(0)<0 || moveRequest.getTarget().get(0)>=8 || moveRequest.getTarget().get(1)<0 || moveRequest.getTarget().get(1)>=8){
+            throw new IllegalArgumentException("Target coordinate is out of bounds");
+        }
+        if(moveRequest.getGameID()==null){
+            throw new IllegalArgumentException("Game ID was null");
         }
 
-        Optional<Game> game=gameRepository.findById(gameId);
+        Optional<Game> game=gameRepository.findById(moveRequest.getGameID());
         if(game.isEmpty()){
-            return false;
+            throw new GameRetrievalException("Could not find game");
         }
 
-        char piece=game.get().getBoardState().charAt(coordToIndex(startX, startY));
+        char piece=game.get().getBoardState().charAt(coordToIndex(moveRequest.getStart().get(0), moveRequest.getStart().get(1)));
         if(piece=='.'){
-            return false;
+            throw new IllegalTileSelectinException("Starting tile was empty");
         }
         if(Character.isLowerCase(piece) && game.get().isWhitesTurn()){
-            return false;
+            throw new IllegalTileSelectinException("Starting tile had a other player's piece");
         }
         if(Character.isUpperCase(piece) && !game.get().isWhitesTurn()){
-            return false;
+            throw new IllegalTileSelectinException("Starting tile had a other player's piece");
         }
 
-        boolean result=validateMove(startX, startY, targetX, targetY, game.get().getBoardState());
-        if(result){
+        ChessEvaluator evaluator=new ChessEvaluator(game.get().getBoardState());
+
+        boolean canMove=evaluator.validateMove(
+                moveRequest.getStart().get(0),
+                moveRequest.getStart().get(1),
+                moveRequest.getTarget().get(0),
+                moveRequest.getTarget().get(1)
+        );
+
+        if(canMove) {
             StringBuilder builder=new StringBuilder(game.get().getBoardState());
-            int startIndex=coordToIndex(startX, startY);
-            int targetIndex=coordToIndex(targetX, targetY);
+            int startIndex=coordToIndex(moveRequest.getStart().get(0), moveRequest.getStart().get(1));
+            int targetIndex=coordToIndex(moveRequest.getTarget().get(0), moveRequest.getTarget().get(1));
             builder.setCharAt(targetIndex, builder.charAt(startIndex));
             builder.setCharAt(startIndex, '.');
 
             game.get().setBoardState(builder.toString());
-            if(game.get().isWhitesTurn()){
-                game.get().setWhitesTurn(false);
-            }else{
-                game.get().setWhitesTurn(true);
-            }
+            game.get().toggleTurn();
+
+            List<Move> gameMoves=game.get().getMoves();
+            String start=evaluator.encodePosition(moveRequest.getStart().get(0), moveRequest.getStart().get(1));
+            String target=evaluator.encodePosition(moveRequest.getTarget().get(0), moveRequest.getTarget().get(1));
+
+            Move newMove=new Move(start+target, game.get());
+            moveRepository.save(newMove);
+
+            gameMoves.add(newMove);
+            game.get().setMoves(gameMoves);
             gameRepository.save(game.get());
-            return true;
+
+            return game.get();
+        }
+        else{
+            throw new RuntimeException("Error processing move");
+        }
+    }
+
+    @Transactional
+    public Game undoMove(@RequestBody UndoMoveRequest request){
+        if(request.getGameID()==null){
+            throw new IllegalArgumentException("Missing parameters");
+        }
+        Optional<Game> gameOptional=gameRepository.findById(request.getGameID());
+        if(gameOptional.isEmpty()){
+            throw new GameRetrievalException("Game with given ID does not exist");
         }
 
-        return false;
+        Game game=gameOptional.get();
+        if(game.getMoves().isEmpty()){
+            throw new InvalidBoardOperationException("There are not moves to undo");
+        }
+
+        ChessEvaluator evaluator=new ChessEvaluator("rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR");
+
+        game.getMoves().remove(game.getMoves().size()-1);
+        for(var move : game.getMoves()){
+            String start=move.getNotation().substring(0, 2);
+            String target=move.getNotation().substring(2, 4);
+            evaluator.makeAMove(start, target);
+        }
+
+        game.setBoardState(evaluator.getBoardString());
+        game.toggleTurn();
+        gameRepository.save(game);
+
+        return game;
     }
 
     private char[][] FENtoArray(String FEN){
@@ -146,194 +253,5 @@ public class GameService {
 
     int coordToIndex(int x, int y){
         return x+8*y;
-    }
-
-    private boolean validateMove(int startX, int startY, int targetX, int targetY, String board){
-        char piece=board.charAt(startX+8*startY);
-        char target=board.charAt(targetX+8*targetY);
-
-       if(!Character.isAlphabetic(piece)){
-           return false;
-       }
-
-       ArrayList<ArrayList<Integer>> validOffsets;
-       switch(Character.toLowerCase(piece)){
-           case 'p'->{
-               return validatePawn(startX, startY, targetX, targetY, board);
-           }
-           case 'r'->{
-               return validateRook(startX, startY, targetX, targetY, board);
-           }
-           case 'k'->{
-                return validateKing(startX, startY, targetX, targetY, board);
-           }
-           case 'n'->{
-               return validateKnight(startX, startY, targetX, targetY, board);
-           }
-           case 'b'->{
-               return validateBishop(startX, startY, targetX, targetY, board);
-           }
-           case 'q'->{
-               return validateQueen(startX, startY, targetX, targetY, board);
-           }
-       }
-
-        return false;
-    }
-
-    private boolean validatePawn(int startX, int startY, int targetX, int targetY, String board){
-        if(Character.isLowerCase(board.charAt(coordToIndex(startX, startY)))){
-            if(board.charAt(coordToIndex(targetX, targetY))=='.' && targetX==startX && targetY==startY+1){
-                return true;
-            }else if( board.charAt(coordToIndex(targetX, targetY))=='.' && startY==1 && targetY==3  && startX==targetX){
-                return true;
-            }else if(Character.isUpperCase(board.charAt(coordToIndex(targetX, targetY))) && startY==targetY-1 && Math.abs(targetX-startX)==1){
-                return true;
-            }
-        }else{
-            if(board.charAt(coordToIndex(targetX, targetY))=='.' && targetX==startX && targetY==startY-1){
-                return true;
-            }else if(board.charAt(coordToIndex(targetX, targetY))=='.' && startY==6 && targetY==4 && startX==targetX){
-                return true;
-            }else if(Character.isLowerCase(board.charAt(coordToIndex(targetX, targetY))) && startY==targetY+1 && Math.abs(targetX-startX)==1){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean validateRook(int startX, int startY, int targetX, int targetY, String board){
-        if(startY==targetY && startX!=targetX){
-            int offset=targetX<startX?-1:1;
-            for(int i=startX+offset;i!=targetX;i+=offset){
-                if(board.charAt(coordToIndex(i, startY))!='.'){
-                    return false;
-                }
-            }
-        }else if(startX==targetX && startY!=targetY){
-            int offset=targetY<startY?-1:1;
-            for(int i=startY+offset;i!=targetY;i+=offset){
-                if(board.charAt(coordToIndex(startX, i))!='.'){
-                    return false;
-                }
-            }
-        }else{
-            return false;
-        }
-
-        char start=board.charAt(coordToIndex(startX, startY));
-        char target=board.charAt(coordToIndex(targetX, targetY));
-
-        return Character.isLowerCase(start) != Character.isLowerCase(target) || target == '.';
-    }
-
-    private boolean validateKing(int startX, int startY, int targetX, int targetY, String board){
-        int xDiff=Math.abs((startX-targetX));
-        int yDiff=Math.abs((startY-targetY));
-
-        if(xDiff==0 && yDiff==0){
-            return false;
-        }
-
-        if(xDiff>1 || yDiff>1){
-            return false;
-        }
-
-        char start=board.charAt(coordToIndex(startX, startY));
-        char target=board.charAt(coordToIndex(targetX, targetY));
-        if(target=='.'){
-            return true;
-        }
-        if(Character.isLowerCase(start)==Character.isLowerCase(target)){
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean validateKnight(int startX, int startY, int targetX, int targetY, String board){
-        class Coord{
-            public int x;
-            public int y;
-
-            public Coord(int x, int y) {
-                this.x = x;
-                this.y = y;
-            }
-        }
-
-        List<Coord> validPositions=new ArrayList<>();
-        validPositions.add(new Coord(startX+1, startY+2));
-        validPositions.add(new Coord(startX-1, startY+2));
-        validPositions.add(new Coord(startX+1, startY-2));
-        validPositions.add(new Coord(startX-1, startY-2));
-
-        validPositions.add(new Coord(startX+2, startY+1));
-        validPositions.add(new Coord(startX+2, startY-1));
-        validPositions.add(new Coord(startX-2, startY+1));
-        validPositions.add(new Coord(startX-2, startY-1));
-
-        boolean valid=false;
-        for(Coord coord : validPositions){
-            if(coord.x==targetX && coord.y==targetY){
-                valid=true;
-                break;
-            }
-        }
-
-        if(!valid){
-            return false;
-        }
-
-        char start=board.charAt(coordToIndex(startX, startY));
-        char target=board.charAt(coordToIndex(targetX, targetY));
-        if(target=='.'){
-            return true;
-        }
-        if(Character.isLowerCase(start)==Character.isLowerCase(target)){
-            return false;
-        }else{
-            return true;
-        }
-    }
-
-    private boolean validateBishop(int startX, int startY, int targetX, int targetY, String board){
-        int xDiff=Math.abs(startX-targetX);
-        int yDiff=Math.abs(startY-targetY);
-
-        if(xDiff==0 && yDiff==0){
-            return false;
-        }
-
-        if(xDiff!=yDiff){
-            return false;
-        }
-
-        int xOffset=startX<targetX?1:-1;
-        int yOffset=startY<targetY?1:-1;
-
-        int x=startX+xOffset, y=startY+yOffset;
-        while(x!=targetX && y!=targetY){
-            if(board.charAt(coordToIndex(x, y))!='.'){
-                return false;
-            }
-            x+=xOffset;
-            y+=yOffset;
-        }
-
-        char start=board.charAt(coordToIndex(startX, startY));
-        char target=board.charAt(coordToIndex(targetX, targetY));
-        if(target=='.'){
-            return true;
-        }
-        if(Character.isLowerCase(start)==Character.isLowerCase(target)){
-            return false;
-        }else{
-            return true;
-        }
-    }
-
-    private boolean validateQueen(int startX, int startY, int targetX, int targetY, String board){
-        return validateBishop(startX, startY, targetX, targetY, board) || validateRook(startX, startY, targetX, targetY, board);
     }
 }

@@ -1,7 +1,13 @@
 package com.example.WebChess.game;
 
+import com.example.WebChess.account.exceptions.AccountRetrievalException;
+import com.example.WebChess.game.exceptions.GameRetrievalException;
+import com.example.WebChess.game.exceptions.IllegalTileSelectinException;
+import com.example.WebChess.game.exceptions.InvalidBoardOperationException;
 import com.example.WebChess.game.requests.ComputerMoveRequest;
+import com.example.WebChess.game.requests.CreateGameRequest;
 import com.example.WebChess.game.requests.MoveRequest;
+import com.example.WebChess.game.requests.UndoMoveRequest;
 import com.example.WebChess.game.responses.ComputerMoveResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,11 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/game")
+@RequestMapping("/api/games")
 public class GameController {
     private final GameService gameService;
 
@@ -22,64 +26,96 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    @GetMapping("/all")
-    public List<GameDTO_accountIDs> getAll(){
+    @GetMapping("")
+    public List<GameDTO> getAll(){
         return gameService.getAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GameDTO_accountIDs> getById(@PathVariable Long id){
-        Optional<GameDTO_accountIDs> game=gameService.getGameById(id);
-        if(game.isEmpty()){
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> getById(@PathVariable Long id){
+        try{
+            GameDTO game=gameService.getGameById(id);
+            return new ResponseEntity<>(game, HttpStatus.OK);
+        }catch (AccountRetrievalException exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
+        }catch (IllegalArgumentException exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        }catch (Exception exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        return new ResponseEntity<>(game.get(), HttpStatus.OK);
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<GameDTO_accountIDs> create(@RequestBody Map<String, String> body){
-        String username1=body.get("username1");
-        String username2=body.get("username2");
-
-        if(username1==null || username2==null){
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    @GetMapping("/username/{username}")
+    public ResponseEntity<?> getUsersGames(@PathVariable String username){
+        try {
+            List<GameDTO> games=gameService.getGamesOfUser(username);
+            return new ResponseEntity<>(games, HttpStatus.OK);
+        }catch (IllegalArgumentException exception) {
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        }catch (AccountRetrievalException exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
         }
+    }
 
-        Optional<GameDTO_accountIDs> game=gameService.create(username1, username2);
-        if(game.isEmpty()){
+    @PostMapping("")
+    public ResponseEntity<GameDTO> create(@RequestBody CreateGameRequest createGameRequest){
+        try{
+            GameDTO game=gameService.create(
+                    createGameRequest.getUsername1(),
+                    createGameRequest.getUsername2(),
+                    createGameRequest.getWhiteIsAutomated(),
+                    createGameRequest.getBlackIsAutomated(),
+                    createGameRequest.getDifficulty()
+            );
+            return new ResponseEntity<>(game, HttpStatus.OK);
+        }catch (Exception error){
+            error.getCause();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        return new ResponseEntity<>(game.get(), HttpStatus.OK);
     }
 
     @PostMapping("/move")
-    public ResponseEntity<String> move(@RequestBody MoveRequest request){
+    public ResponseEntity<?> move(@RequestBody MoveRequest request){
         if(request.getGameID()==null || request.getStart()==null || request.getTarget()==null || request.getStart().size()!=2 || request.getTarget().size()!=2){
             return new ResponseEntity<>("Invalid parameters", HttpStatus.BAD_REQUEST);
         }
-
-        boolean result = gameService.makeAMove(request.getGameID(), request.getStart().get(0), request.getStart().get(1), request.getTarget().get(0), request.getTarget().get(1));
-
-        if(!result){
-            return new ResponseEntity<>("Invalid move", HttpStatus.BAD_REQUEST);
+        try{
+            Game game = gameService.makeAMove(request);
+            return new ResponseEntity<>(new GameDTO(game), HttpStatus.OK);
+        }catch (GameRetrievalException exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
+        }catch (IllegalTileSelectinException | IllegalArgumentException exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        }catch (RuntimeException exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        return new ResponseEntity<>("Valid move", HttpStatus.OK);
     }
 
     @PostMapping("/computerMove")
-    public ResponseEntity<ComputerMoveResponse> computerMove(@RequestBody ComputerMoveRequest request) {
-        if(request.getGameID()==null || request.getDepth()<1){
-            return new ResponseEntity<>(new ComputerMoveResponse(""), HttpStatus.BAD_REQUEST);
-        }
-
+    public ResponseEntity<?> computerMove(@RequestBody ComputerMoveRequest request) {
         try{
-            String newBoardState=gameService.makeAComputerMove(request.getGameID(), request.getWhite(), request.getDepth());
-            return new ResponseEntity<>(new ComputerMoveResponse(newBoardState), HttpStatus.OK);
-        }catch (Exception error){
-            return new ResponseEntity<>(new ComputerMoveResponse(""), HttpStatus.NOT_FOUND);
+            Game game=gameService.makeAComputerMove(request);
+            return new ResponseEntity<>(new GameDTO(game), HttpStatus.OK);
+        }catch (IllegalArgumentException exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        }catch (GameRetrievalException exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
+        }catch (Exception exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/undo")
+    public ResponseEntity<?> undoMove(@RequestBody UndoMoveRequest request){
+        try{
+            Game game=gameService.undoMove(request);
+            return new ResponseEntity<>(new GameDTO(game), HttpStatus.OK);
+        }catch (IllegalArgumentException | InvalidBoardOperationException exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        }catch (GameRetrievalException exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception exception){
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

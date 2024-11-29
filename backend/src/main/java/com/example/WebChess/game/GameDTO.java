@@ -1,18 +1,24 @@
 package com.example.WebChess.game;
 
+import com.example.WebChess.move.MoveDTO;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GameDTO_accountIDs {
+public class GameDTO {
     private Long id;
     private String boardState;
     private List<Long> accountIDs;
     boolean whitesTurn=true;
     LocalDateTime created;
     LocalDateTime lastUpdate;
+    Boolean whiteIsAutomated;
+    Boolean blackIsAutomated;
+    private List<MoveDTO> moves;
+    String result;
 
-    public GameDTO_accountIDs(Game game) {
+    public GameDTO(Game game) {
         this.id=game.getId();
         this.boardState=game.getBoardState();
         this.whitesTurn=game.isWhitesTurn();
@@ -21,6 +27,38 @@ public class GameDTO_accountIDs {
         this.accountIDs.add(game.getBlackAccount().getId());
         this.created=game.getCreated();
         this.lastUpdate=game.getLastUpdate();
+        this.whiteIsAutomated =game.getWhiteIsAutomated();
+        this.blackIsAutomated =game.getBlackIsAutomated();
+        this.result=game.getResult();
+
+        moves=new ArrayList<>();
+        for(var move : game.getMoves()){
+            moves.add(new MoveDTO(move));
+        }
+    }
+
+    public List<MoveDTO> getMoves() {
+        return moves;
+    }
+
+    public void setMoves(List<MoveDTO> moves) {
+        this.moves = moves;
+    }
+
+    public Boolean getWhiteIsAutomated() {
+        return whiteIsAutomated;
+    }
+
+    public void setWhiteIsAutomated(Boolean whiteIsAutomated) {
+        this.whiteIsAutomated = whiteIsAutomated;
+    }
+
+    public Boolean getBlackIsAutomated() {
+        return blackIsAutomated;
+    }
+
+    public void setBlackIsAutomated(Boolean blackIsAutomated) {
+        this.blackIsAutomated = blackIsAutomated;
     }
 
     public LocalDateTime getCreated() {

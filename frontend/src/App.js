@@ -2,8 +2,10 @@ import React from "react";
 import {BrowserRouter, Routes, Route} from "react-router-dom"
 import { BoardContextProvider } from "./Components/BoardContextProvider";
 
-import Board from "./Pages/Board";
 import Home from "./Pages/Home";
+import Game from "./Pages/Game";
+import SignIn from "./Pages/SignIn";
+import Register from "./Pages/Register";
 
 function App() {
   return (
@@ -11,8 +13,10 @@ function App() {
       <BoardContextProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/board" element={<Board/>}/>
+            <Route path="/game" element={<Game/>}/>
             <Route path="/" element={<Home/>}/>
+            <Route path="/signin" element={<SignIn/>}/>
+            <Route path="/register" element={<Register/>}/>
           </Routes>
         </BrowserRouter>
       </BoardContextProvider>
