@@ -6,8 +6,8 @@ const gameInitialValue={
         id: 1,
         boardState: "rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR",
         accountIDs: [
-            1,
-            2
+            "",
+            ""
         ],
         whitesTurn: true,
         whiteIsAutomated:false,

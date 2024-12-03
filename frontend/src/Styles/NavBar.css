@@ -1,0 +1,19 @@
+.NavBar-Container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+}
+
+.NavBar-Container.Title{
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: row;
+}
+
+.NavBar-Container.Buttons{
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: row;
+}

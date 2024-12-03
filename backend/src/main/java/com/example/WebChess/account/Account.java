@@ -1,10 +1,10 @@
 package com.example.WebChess.account;
 
 import com.example.WebChess.game.Game;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,7 +12,7 @@ import java.util.List;
 
 @Entity
 @Table
-public class Account {
+public class Account implements UserDetails {
     @Id
     @SequenceGenerator(
             name="account_sequence",
@@ -29,7 +29,8 @@ public class Account {
     @Column(name = "username", unique = true)
     private String username;
     private String password;
-    private String role;
+    @Enumerated(EnumType.ORDINAL)
+    private AccountRole role;
 
     public Account() {
         this.id = null;
@@ -41,7 +42,7 @@ public class Account {
         this.games = new ArrayList<>();
     }
 
-    public Account(String username, String password, String role){
+    public Account(String username, String password, AccountRole role){
         this.username=username;
         this.password=password;
         this.role=role;
@@ -49,12 +50,47 @@ public class Account {
         this.games = new ArrayList<>();
     }
 
+
+
     public String getUsername() {
         return username;
     }
 
+    public AccountRole getRole() {
+        return role;
+    }
+
+    public void setRole(AccountRole role) {
+        this.role = role;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return UserDetails.super.isAccountNonExpired();
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return UserDetails.super.isAccountNonLocked();
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return UserDetails.super.isCredentialsNonExpired();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return UserDetails.super.isEnabled();
+    }
+
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     public String getPassword() {
@@ -63,14 +99,6 @@ public class Account {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
     }
 
     public Long getId() {

@@ -5,13 +5,13 @@ import com.example.WebChess.game.Game;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AccountDTO_gameIDs {
+public class AccountDTO {
     private Long id;
     private String username;
     private List<Long> gameIDs;
-    private String role;
+    private AccountRole role;
 
-    public AccountDTO_gameIDs(Account account) {
+    public AccountDTO(Account account) {
         this.id = account.getId();
         this.username = account.getUsername();
         this.role=account.getRole();
@@ -47,11 +47,11 @@ public class AccountDTO_gameIDs {
         this.gameIDs = gameIDs;
     }
 
-    public String getRole() {
+    public AccountRole getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(AccountRole role) {
         this.role = role;
     }
 }

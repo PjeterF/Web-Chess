@@ -22,7 +22,7 @@ public class AccountDetailsService implements UserDetailsService {
         return User.builder()
                 .username(account.get().getUsername())
                 .password(account.get().getPassword())
-                .roles(account.get().getRole())
+                //.roles(account.get().getRole())
                 .build();
     }
 }

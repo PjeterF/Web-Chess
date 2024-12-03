@@ -1,15 +1,15 @@
 package com.example.WebChess.account.requests;
 
-import com.example.WebChess.account.AccountRole;
-
-public class CreateAccountRequest {
+public class LoginRequest {
     private String username;
     private String password;
-    private AccountRole role;
 
-    public CreateAccountRequest(String username, String password) {
+    public LoginRequest(String username, String password) {
         this.username = username;
         this.password = password;
+    }
+
+    public LoginRequest() {
     }
 
     public String getUsername() {
@@ -26,13 +26,5 @@ public class CreateAccountRequest {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public AccountRole getRole() {
-        return role;
-    }
-
-    public void setRole(AccountRole role) {
-        this.role = role;
     }
 }

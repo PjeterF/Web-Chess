@@ -1,7 +1,9 @@
 package com.example.WebChess;
 
+import com.example.WebChess.account.AccountRole;
 import com.example.WebChess.account.AccountService;
 import com.example.WebChess.chess.ChessEvaluator;
+import com.example.WebChess.configuration.JWTService;
 import com.example.WebChess.game.Game;
 import com.example.WebChess.game.GameDTO;
 import com.example.WebChess.game.GameService;
@@ -24,13 +26,12 @@ public class WebChessApplication {
 	@Bean
 	CommandLineRunner commandLineRunner(AccountService accountService, GameService gameService){
 		return args->{
-			accountService.createAccount("User1", "123", "USER");
-			accountService.createAccount("User2", "qwe", "USER");
-			accountService.createAccount("Computer", "COMPUTER", "USER");
+			accountService.createAccount("User1", "123", AccountRole.USER);
+			accountService.createAccount("User2", "qwe", AccountRole.USER);
+			accountService.createAccount("Computer", "COMPUTER", AccountRole.COMPUTER);
 
-			GameDTO game=gameService.create("User1", "Computer", false, true, 4);
-			gameService.makeAMove(new MoveRequest(game.getId(), List.of(1, 6), List.of(1, 5)));
-			gameService.undoMove(new UndoMoveRequest(game.getId()));
+			String tok=accountService.login("User2", "qwe");
+			System.out.println(tok);
         };
 	}
 }

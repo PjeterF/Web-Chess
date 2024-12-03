@@ -9,7 +9,7 @@ import java.util.List;
 public class GameDTO {
     private Long id;
     private String boardState;
-    private List<Long> accountIDs;
+    private List<String> accountIDs;
     boolean whitesTurn=true;
     LocalDateTime created;
     LocalDateTime lastUpdate;
@@ -23,8 +23,8 @@ public class GameDTO {
         this.boardState=game.getBoardState();
         this.whitesTurn=game.isWhitesTurn();
         this.accountIDs=new ArrayList<>();
-        this.accountIDs.add(game.getWhiteAccount().getId());
-        this.accountIDs.add(game.getBlackAccount().getId());
+        this.accountIDs.add(game.getWhiteAccount().getUsername());
+        this.accountIDs.add(game.getBlackAccount().getUsername());
         this.created=game.getCreated();
         this.lastUpdate=game.getLastUpdate();
         this.whiteIsAutomated =game.getWhiteIsAutomated();
@@ -93,11 +93,11 @@ public class GameDTO {
         this.boardState = boardState;
     }
 
-    public List<Long> getAccountIDs() {
+    public List<String> getAccountIDs() {
         return accountIDs;
     }
 
-    public void setAccountIDs(List<Long> accountIDs) {
+    public void setAccountIDs(List<String> accountIDs) {
         this.accountIDs = accountIDs;
     }
 

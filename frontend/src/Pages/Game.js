@@ -4,6 +4,7 @@ import "../Styles/Game.css"
 import { BoardContextProvider } from "../Components/BoardContextProvider";
 import GameList from "../Components/GameList";
 import Controls from "../Components/Controls";
+import NavBar from "../Components/NavBar";
 
 
 function Game(){
@@ -13,7 +14,7 @@ function Game(){
                 <Controls/>
             </div>
             <div className="Game-grid-mid">
-            <ChessBoard/>
+                <ChessBoard/>
             </div>
             <div className="Game-grid-right">
                 <GameList/>

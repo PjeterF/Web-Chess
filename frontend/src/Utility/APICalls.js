@@ -2,7 +2,42 @@ const server='http://localhost:8080'
 
 export async function loadGame(gameID){
     try {
-        const response=await fetch('http://localhost:8080/api/games/'+gameID)
+        const token=sessionStorage.getItem('token')
+        if(token==null){
+            throw new Error('Missing token')
+        }
+        const response=await fetch(server+'/api/games/'+gameID, {
+                method:'GET',
+                headers:{
+                    'Authorization':'Bearer '+token
+                },
+            }
+        )
+
+        if(response.ok){
+            return await response.json()
+        }else{
+            return null
+        }
+    } catch (error) {
+        console.log(error)
+        return null
+    }
+}
+
+export async function loadGames(username){
+    try {
+        const token=sessionStorage.getItem('token')
+        if(token==null){
+            throw new Error('Missing token')
+        }
+        const response=await fetch(server+'/api/games/username/'+username, {
+                method:'GET',
+                headers:{
+                    'Authorization':'Bearer '+token
+                },
+            }
+        )
 
         if(response.ok){
             return await response.json()
@@ -17,9 +52,16 @@ export async function loadGame(gameID){
 
 export async function movePiece(gameID, startX, startY, targetX, targetY){
     try {
-        const response=await fetch('http://localhost:8080/api/games/move', {
+        const token=sessionStorage.getItem('token')
+        if(token==null){
+            throw new Error('Missing token')
+        }
+        const response=await fetch(server+'/api/games/move', {
             method:'POST',
-            headers:{'Content-Type':'application/json'},
+            headers:{
+                'Content-Type':'application/json',
+                'Authorization':'Bearer '+token
+            },
             body: JSON.stringify({gameID:gameID, start:[startX, startY], target:[targetX, targetY]})
         })
 
@@ -36,9 +78,16 @@ export async function movePiece(gameID, startX, startY, targetX, targetY){
 
 export async function makeComputerMove(gameID, white, depth){
     try {
-        const response=await fetch('http://localhost:8080/api/games/computerMove', {
+        const token=sessionStorage.getItem('token')
+        if(token==null){
+            throw new Error('Missing token')
+        }
+        const response=await fetch(server+'/api/games/computerMove', {
             method:'POST',
-            headers:{'Content-Type':'application/json'},
+            headers:{
+                'Content-Type':'application/json',
+                'Authorization':'Bearer '+token
+            },
             body: JSON.stringify({gameID:gameID, white:white, depth:depth})
         })
 
@@ -55,9 +104,16 @@ export async function makeComputerMove(gameID, white, depth){
 
 export async function undoMove(gameID){
     try {
+        const token=sessionStorage.getItem('token')
+        if(token==null){
+            throw new Error('Missing token')
+        }
         const response=await fetch(server+'/api/games/undo', {
             method:'POST',
-            headers:{'Content-Type':'application/json'},
+            headers:{
+                'Content-Type':'application/json',
+                'Authorization':'Bearer '+token
+            },
             body: JSON.stringify({
                 gameID:gameID
                 })
@@ -76,9 +132,16 @@ export async function undoMove(gameID){
 
 export async function createGame(usesrnameWhite, usernameBlack, whiteIsAutomated, blackIsAutomated){
     try{
+        const token=sessionStorage.getItem('token')
+        if(token==null){
+            throw new Error('Missing token')
+        }
         const response=await fetch(server+'/api/games', {
         method:'POST',
-        headers:{'Content-Type':'application/json'},
+        headers:{
+            'Content-Type':'application/json',
+            'Authorization':'Bearer '+token
+        },
         body: JSON.stringify({
             username1:usesrnameWhite,
             username2:usernameBlack,
@@ -97,5 +160,49 @@ export async function createGame(usesrnameWhite, usernameBlack, whiteIsAutomated
     }catch(error){
         console.log(error)
         return null
+    }
+}
+
+export async function login(username, password){
+    try{
+        const response=await fetch(server+'/api/accounts/login', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+            username:username,
+            password:password
+            })
+        })
+
+        if(response.ok){
+            return await response.text()
+        }
+        else{
+            throw new Error(await response.text())
+        }
+    }catch(error){
+        throw error
+    }
+}
+
+export async function register(username, password){
+    try{
+        const response=await fetch(server+'/api/accounts', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+            username:username,
+            password:password
+            })
+        })
+
+        if(response.ok){
+            return await response.json()
+        }
+        else{
+            throw new Error(await response.text())
+        }
+    }catch(error){
+        throw error
     }
 }

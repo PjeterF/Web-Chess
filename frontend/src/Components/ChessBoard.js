@@ -12,6 +12,7 @@ function ChessBoard(){
     const pieceSize=64
     const [selectedCell, setSelectedCell]=useState(null)
     const [processingMove, setProcessingMove]=useState(false)
+    const [socket, setSocket]=useState(null)
 
     const image=new Image()
     image.src='/pieces.png'
@@ -48,6 +49,9 @@ function ChessBoard(){
                 type:'set game',
                 payload:game
             })
+            if(socket!=null){
+                socket.send(JSON.stringify(game))
+            }
         }else{
             alert("Error making computer move")
         }
@@ -55,6 +59,13 @@ function ChessBoard(){
             type:'toggle process move',
             payload:null
         })
+    }
+
+    function charIsUppercase(c){
+        return c>='A' && c<='Z'
+    }
+    function charIsLowercase(c){
+        return c>='a' && c<='z'
     }
 
     async function handleClick(e){
@@ -70,6 +81,17 @@ function ChessBoard(){
             if(board[indexNew]==='.'){
                 setSelectedCell(null)
             }else{
+                if(sessionStorage.getItem('username')==boardContextValue.game.accountIDs[0]){
+                    if(charIsLowercase(board[indexNew])){
+                        setSelectedCell(null)
+                        return
+                    }
+                }else if(sessionStorage.getItem('username')==boardContextValue.game.accountIDs[1]){
+                    if(charIsUppercase(board[indexNew])){
+                        setSelectedCell(null)
+                        return
+                    }
+                }
                 setSelectedCell(newSelectedCell)
             }
         }else{
@@ -81,7 +103,9 @@ function ChessBoard(){
                     type:'set game',
                     payload:game
                 })
-                console.log(game)
+                if(socket!=null){
+                    socket.send(JSON.stringify(game))
+                }
             }else{
                 alert("Invalid move")
             }
@@ -153,16 +177,36 @@ function ChessBoard(){
         moveAutonomously()
     },[boardContextValue.game.whitesTurn])
 
+    useEffect(()=>{
+        const roomID=boardContextValue.game.id
+        const url='ws://localhost:8080/game?roomID='+roomID
+        const soc=new WebSocket(url)
+
+        soc.onopen=()=>{
+            console.log('Connection established')
+        }
+        soc.onclose=()=>{
+            console.log('Connection closed')
+        }
+        soc.onerror=(event)=>{
+            console.log('Socket error: '+event.type)
+        }
+        soc.onmessage=(event)=>{
+            console.log('Message recieved')
+            const gameStr=event.data
+            dispatch({
+                type:'set game',
+                payload:JSON.parse(gameStr)
+            })
+        }
+
+        setSocket(soc)
+    }, [])
+
     const turnBoxColor={
         backgroundColor:boardContextValue.game.whitesTurn?'#F8F8F2':'#222222',
         color:boardContextValue.game.whitesTurn?'#222222':'#F8F8F2',
         borderColor:boardContextValue.game.whitesTurn?'#222222':'#F8F8F2',
-    }
-
-    function infoBox(){
-        return({
-
-        })
     }
 
     return(
