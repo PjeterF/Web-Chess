@@ -7,8 +7,12 @@ An online chess application built with Spring Boot and React, where players can 
 - Game history
 - User authentication
 ## Setup
+Clone repository
+```
+git clone https://github.com/PjeterF/Web-Chess.git
+```
 ### Backend
-1. Configure database connection in application.properties
+Configure database connection in application.properties
 ```
 spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=WebChess;trustServerCertificate=true;
 spring.datasource.username=sa
@@ -16,7 +20,7 @@ spring.datasource.password=sa
 spring.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.SQLServerDialect
 ```
-2. Build and run
+Build and run
 ```
 cd web-chess/backend
 mvn clean install
