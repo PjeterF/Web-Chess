@@ -26,7 +26,7 @@ function SignIn(){
         try {
             const token=await login('User1', '123')
             sessionStorage.setItem("token", token)
-            sessionStorage.setItem('User1', username)
+            sessionStorage.setItem('username', 'User1')
             navigate('/home') 
         } catch (err) {
             setError(err.message)

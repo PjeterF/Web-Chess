@@ -58,7 +58,7 @@ function Register(){
                 <div onClick={handleSubmit} className="Auth-Submit">Register</div>
                 <div style={{display:'flex', justifyContent:'space-between'}}>
                     {error!=null?<div style={{color:'orange'}}>{error}</div>:<div></div>}
-                    <div style={{textDecoration:'underline', cursor:'pointer'}} className="Auth-Label" onClick={()=>{navigate('/signin')}}>Sign In</div>
+                    <div style={{textDecoration:'underline', cursor:'pointer'}} className="Auth-Label" onClick={()=>{navigate('/')}}>Sign In</div>
                 </div>
             </div>
         </div>

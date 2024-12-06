@@ -9,7 +9,7 @@ function NavBar(){
     function handleLogOut(){
         sessionStorage.removeItem('token')
         sessionStorage.removeItem('username')
-        navigate('/signin')
+        navigate('/')
     }
 
     return(
