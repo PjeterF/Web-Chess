@@ -10,18 +10,11 @@ import GameSettings from "../Components/GameSettings";
 
 import { createGame } from "../Utility/APICalls";
 import NavBar from "../Components/NavBar";
+import Gamemode from "../Components/Gamemode";
 
 function Home(){
     const {boardContextValue, dispatch}=useContext(boardContext)
     const navigate=useNavigate()
-
-    async function onHost(){
-
-    }
-
-    async function onJoin(){
-
-    }
 
     async function playAgainstComputer(){
         const game=await createGame(sessionStorage.getItem('username'), 'Computer', false, true)
@@ -52,17 +45,7 @@ function Home(){
 
     return(
         <div className="home-container">
-            <NavBar/>
-            <div className="home-sub-container">
-            <div className="button button-ash" style={buttonStyle}>Login</div>
-            <div className="button button-khaki" style={buttonStyle}>Create account</div>
-            </div>
-            <div className="home-sub-container">
-                <div className="button button-gray" onClick={playAgainstComputer} style={buttonStyle}>Play agaist computer</div>
-                <div className="button button-ash" onClick={()=>{playAgainstPlayer(sessionStorage.getItem('username'), 'User1')}} style={buttonStyle}>Host game</div>
-                <div className="button button-khaki" style={buttonStyle}>Join game</div>
-            </div>
-            <GameSettings/>
+            <Gamemode/>
             <GameList/>
         </div>
     )

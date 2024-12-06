@@ -152,14 +152,13 @@ export async function createGame(usesrnameWhite, usernameBlack, whiteIsAutomated
         })
 
         if(response.ok){
-            const data=await response.json()
-            return data
-        }else{
-            return null
+            return await response.json()
+        }
+        else{
+            throw new Error(await response.text())
         }
     }catch(error){
-        console.log(error)
-        return null
+        throw error
     }
 }
 

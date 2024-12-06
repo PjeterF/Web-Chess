@@ -30,7 +30,8 @@ function GameInfoBox({gameID, created, lastUpdate}){
                 transform: isHovered?'scale(1.01)':'scale(1.0)',
                 transition:'transform 0.2s ease',
                 cursor:'pointer',
-                marginBottom:'3px'
+                marginBottom:'3px',
+                backgroundColor:'white'
             }}
             onMouseEnter={()=>{setIsHovered(true)}}
             onMouseLeave={()=>{setIsHovered(false)}}
