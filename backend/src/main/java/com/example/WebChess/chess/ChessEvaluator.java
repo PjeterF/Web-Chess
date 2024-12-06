@@ -21,6 +21,12 @@ public class ChessEvaluator {
             {1, 1, 1, 1, 1, 1, 1, 1},
             {1, 1, 1, 1, 1, 1, 1, 1},
         };
+
+        for(int y=0;y<8;y++){
+            for(int x=0;x<8;x++){
+                weights[y][x]=5-Math.abs(4-y);
+            }
+        }
     }
 
     public ChessEvaluator(String boardString){
@@ -330,13 +336,14 @@ public class ChessEvaluator {
                 }
                 int sign=Character.isUpperCase(board[y][x])?1:-1;
                 switch (Character.toLowerCase(board[y][x])){
-                    case 'p'->{score+=sign*1;}
-                    case 'r'->{score+=sign*3;}
-                    case 'k'->{score+=sign*1000;}
-                    case 'n'->{score+=sign*5;}
-                    case 'b'->{score+=sign*3;}
-                    case 'q'->{score+=sign*10;}
+                    case 'p'->{score+=sign*100;}
+                    case 'r'->{score+=sign*300;}
+                    case 'k'->{score+=sign*10000;}
+                    case 'n'->{score+=sign*500;}
+                    case 'b'->{score+=sign*300;}
+                    case 'q'->{score+=sign*1000;}
                 }
+                score+=weights[y][x];
             }
         }
 
