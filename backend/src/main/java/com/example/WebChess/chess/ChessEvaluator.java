@@ -1,15 +1,13 @@
 package com.example.WebChess.chess;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 
 public class ChessEvaluator {
-    private char[][] board;
-    private StringBuilder stringBuilder;
-    private static int[][] weights;
+    private final char[][] board;
+    private final StringBuilder stringBuilder;
+    private static final int[][] weights;
     static{
         weights= new int[][]{
             {1, 1, 1, 1, 1, 1, 1, 1},
