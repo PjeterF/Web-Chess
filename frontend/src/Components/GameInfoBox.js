@@ -2,8 +2,9 @@ import React, { useContext, useState } from "react";
 import { boardContext } from "./BoardContextProvider";
 import { loadGame } from "../Utility/APICalls";
 import { useNavigate } from "react-router-dom";
+import "../Styles/GameInfoBox.css"
 
-function GameInfoBox({gameID, created, lastUpdate}){
+function GameInfoBox({gameID, created, users, result}){
     const [isHovered, setIsHovered]=useState(false)
     const {boardContextValue, dispatch}=useContext(boardContext)
     const navigate=useNavigate()
@@ -23,23 +24,15 @@ function GameInfoBox({gameID, created, lastUpdate}){
 
     return(
         <div
-            style={{
-                border:'2px solid black',
-                borderRadius:'5px',
-                padding:'5px',
-                transform: isHovered?'scale(1.01)':'scale(1.0)',
-                transition:'transform 0.2s ease',
-                cursor:'pointer',
-                marginBottom:'3px',
-                backgroundColor:'white'
-            }}
+            className="GameInfoBox"
             onMouseEnter={()=>{setIsHovered(true)}}
             onMouseLeave={()=>{setIsHovered(false)}}
             onClick={()=>{handleClick(gameID)}}
         >
-            <div>ID: {gameID}</div>
-            <div>Created: {created}</div>
-            <div>Last update: {lastUpdate}</div>
+            <div className="GameInfoBox-Item">{gameID}</div>
+            <div className="GameInfoBox-Item">{created}</div>
+            <div className="GameInfoBox-Item">{users[0]} vs {users[1]}</div>
+            <div className="GameInfoBox-Item End">{result}</div>
         </div>
     )
 }

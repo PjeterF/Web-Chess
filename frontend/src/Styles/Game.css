@@ -1,20 +1,22 @@
+@import 'Shared-Colors.css';
+
 .Game-grid{
     display: grid;
     grid-template-areas:
-    'top top'
-    'mid right'
-    'bot bot'
+    'left right-top'
+    'left right-bottom'
     ;
     grid-template-rows: 10% auto 20%;
     grid-template-columns: 80% 20%;
-    height: 100vh;
-    overflow-y: hidden;
-    background-color: rgb(73, 73, 73);
+    
+    background-image: url('/public/background2.png');
+    background-repeat: repeat;
+    background-size: 512px 512px;
+    image-rendering: pixelated;
+    background-color: var(--primary-color);
+    padding: 20px;
 }
 
-.Game-grid-top{ grid-area: top; }
-.Game-grid-mid{
-     grid-area: mid;
-}
-.Game-grid-bot{ grid-area: bot; }
-.Game-grid-bot{ grid-area: right; }
+.Game-grid-left{ grid-area: left; }
+.Game-grid-right-top{ grid-area: right-top; }
+.Game-grid-right-bottom{ grid-area: right-bottom; }

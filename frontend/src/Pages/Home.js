@@ -38,15 +38,14 @@ function Home(){
         }
     }
 
-    const buttonStyle={
-        margin:'4px',
-        width:'140px'
-    }
-
     return(
-        <div className="home-container">
-            <Gamemode/>
-            <GameList/>
+        <div style={{display:'grid', gridTemplateRows:'auto 91.5vh'}}>
+            <div className="Home-Header">
+                <NavBar/>
+            </div>
+            <div className="Home-Body">
+                <Gamemode/>
+            </div>
         </div>
     )
 }

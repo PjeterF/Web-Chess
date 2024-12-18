@@ -3,6 +3,7 @@ import { useContext } from "react";
 import { boardContext } from "./BoardContextProvider";
 import GameInfoBox from "./GameInfoBox";
 import { loadGames } from "../Utility/APICalls";
+import "../Styles/GameList.css"
 
 function GameList(){
     const [username, setUsername]=useState(sessionStorage.getItem('username'))
@@ -24,11 +25,18 @@ function GameList(){
     }, [boardContextValue.game.id, username])
 
     return(
-        <div style={{height:'100%', width:'auto', overflow:'scroll', overflowX:'hidden'}}>
+        <div>
+            <div className="GameList-Heading">
+                <div className="GameList-Heading-Item">Id</div>
+                <div className="GameList-Heading-Item">Date created</div>
+                <div className="GameList-Heading-Item">Players</div>
+                <div className="GameList-Heading-Item">Status</div>
+            </div>
             {list.map((game, index)=>(
-                <GameInfoBox key={index} gameID={game.id} created={game.created} lastUpdate={game.lastUpdate}/>
+                <GameInfoBox key={index} gameID={game.id} created={game.created} users={game.accountIDs} result={game.result}/>
             ))}
-        </div> 
+        </div>
+        
     )
 }
 

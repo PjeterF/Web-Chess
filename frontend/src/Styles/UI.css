@@ -1,16 +1,30 @@
+@import 'Shared-Colors.css';
+
 .button{
-    border: 0px solid black;
+    border: 0px solid var(--accent-color);
     border-radius: 5px;
     cursor: pointer;
-    transition: background 10s ease;
     padding: 5px;
     display: flex;
     justify-content: center;
     box-shadow: 0px 2px 2px rgb(63, 63, 63);
+    color: var(--text-color);
 }
 
 .button:hover{
     filter: brightness(1.1);
+}
+
+.button-primary{
+    background-color: var(--primary-color);
+}
+
+.button-secondary{
+    background-color: var(--secondary-color);
+}
+
+.button-danger{
+    background-color: var(--danger-color);
 }
 
 .button-green{
@@ -35,4 +49,30 @@
 
 .button-khaki{
     background: linear-gradient(90deg, #C3B299, #a1937e);
+}
+
+.button-primary{
+
+}
+
+.Container{
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
+    border-radius: 5px;
+    background: rgba( 255, 255, 255, 0.1 );
+    backdrop-filter: blur( 2px );
+}
+
+.SubContainer{
+    display:flex;
+    flex-direction: column;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 5px;
+    background-color: var(--accent-color);
+    gap: 8px;
+    box-sizing: border-box;
 }

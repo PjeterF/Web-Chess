@@ -1,19 +1,50 @@
+@import 'Shared-Colors.css';
+
 .NavBar-Container{
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
     padding: 5px;
+    background-color: var(--accent-color);
+    height: 50px;
 }
 
 .NavBar-Container.Title{
     display: flex;
     justify-content: flex-start;
     flex-direction: row;
+    color: var(--text-color);
+    cursor: pointer;
 }
 
 .NavBar-Container.Buttons{
     display: flex;
     justify-content: flex-end;
     flex-direction: row;
+    gap: 20px;
+    white-space: nowrap;
+}
+
+.NavBar-Button{
+    color: var(--text-color);
+    width: 100%;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.NavBar-Button:hover{
+    background-color: var(--primary-color);
+}
+
+.NavBar-LogOut-Section{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    color: var(--text-color);
+    border-left: solid;
+    border-color: var(--secondary-color);
+    padding: 5px;
 }

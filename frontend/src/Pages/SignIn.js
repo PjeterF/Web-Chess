@@ -45,7 +45,7 @@ function SignIn(){
                     {error!=null?<div style={{color:'orange'}}>{error}</div>:<div></div>}
                     <div style={{textDecoration:'underline', cursor:'pointer'}} className="Auth-Label" onClick={()=>{navigate('/register')}}>Register</div>
                 </div>
-                <div onClick={loginWithDemoAccount} style={{marginTop:'8px', color:'white', border:'1px solid white'}} className="button button-gray">Sign in with demo account</div>
+                <div onClick={loginWithDemoAccount} style={{marginTop:'8px', color:'white', border:'1px solid white'}} className="button button-secondary">Sign in with demo account</div>
             </div>
         </div>
     )

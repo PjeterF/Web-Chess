@@ -9,17 +9,21 @@ import NavBar from "../Components/NavBar";
 
 function Game(){
     return(
-        <div className="Game-grid">
-            <div className="Game-grid-top">
-                <Controls/>
+        <div style={{display:'grid', gridTemplateRows:'auto 91.5vh'}}>
+            <div>
+                <NavBar/>
             </div>
-            <div className="Game-grid-mid">
-                <ChessBoard/>
-            </div>
-            <div className="Game-grid-right">
-                <GameList/>
+            <div className="Game-grid">
+                <div className="Game-grid-right-top">
+                    <Controls/>
+                </div>
+                <div className="Game-grid-left">
+                    <ChessBoard/>
+                </div>
             </div>
         </div>
+            
+        
     )
 }
 

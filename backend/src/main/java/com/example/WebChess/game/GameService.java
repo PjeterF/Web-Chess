@@ -212,7 +212,16 @@ public class GameService {
 
         ChessEvaluator evaluator=new ChessEvaluator("rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR");
 
-        game.getMoves().remove(game.getMoves().size()-1);
+        boolean shouldToggleTurn=false;
+        if(!game.getMoves().isEmpty()){
+            game.getMoves().remove(game.getMoves().size()-1);
+            shouldToggleTurn=!shouldToggleTurn;
+        }
+        if(!game.getMoves().isEmpty()){
+            game.getMoves().remove(game.getMoves().size()-1);
+            shouldToggleTurn=!shouldToggleTurn;
+        }
+
         for(var move : game.getMoves()){
             String start=move.getNotation().substring(0, 2);
             String target=move.getNotation().substring(2, 4);
@@ -220,7 +229,9 @@ public class GameService {
         }
 
         game.setBoardState(evaluator.getBoardString());
-        game.toggleTurn();
+        if(shouldToggleTurn){
+            game.toggleTurn();
+        }
         gameRepository.save(game);
 
         return game;

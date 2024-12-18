@@ -43,7 +43,8 @@ function ChessBoard(){
             payload:null
         })
 
-        const game=await makeComputerMove(boardContextValue.game.id, white, 6)
+        console.log(boardContextValue)
+        const game=await makeComputerMove(boardContextValue.game.id, white, boardContextValue.game.difficulty)
         if(game!=null){
             dispatch({
                 type:'set game',
@@ -162,13 +163,19 @@ function ChessBoard(){
     },[boardContextValue.game.boardState, selectedCell])
 
     useEffect(()=>{
+        async function timeout(ms){
+            return new Promise(resolve=>setTimeout(resolve, ms))
+        }
+
         async function moveAutonomously(){
             if(boardContextValue.game.whitesTurn && boardContextValue.game.whiteIsAutomated){
                 setProcessingMove(true)
+                await timeout(1000)
                 await handleComputerMove(true)
             }
             if(!boardContextValue.game.whitesTurn && boardContextValue.game.blackIsAutomated){
                 setProcessingMove(true)
+                await timeout(1000)
                 await handleComputerMove(false)
             }
             setProcessingMove(false)

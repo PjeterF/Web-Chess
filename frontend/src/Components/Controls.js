@@ -24,11 +24,13 @@ function Controls(){
     }
 
     return(
-        <div style={{display:'flex', flexDirection:'row'}}>
-            <div className="button button-red">Restart</div>
-            <div className="button button-green" onClick={undoOnce}>Undo move</div>
-            <div className="button button-green" onClick={undoTwice}>Go back a turn</div>
-            <div className="button button-blue">Resign</div>
+        <div className="Container">
+            <div className="SubContainer">
+                <div style={{color:'var(--text-color)'}}>Controls</div>
+                <div className="button button-primary">Restart</div>
+                <div className="button button-secondary" onClick={undoOnce}>Undo Turn</div>
+                <div className="button button-danger">Resign</div>
+            </div>
         </div>
     )
 }

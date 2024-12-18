@@ -1,0 +1,19 @@
+@import 'Shared-Colors.css';
+
+.SideBar{
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    background-color: brown;
+    transition: 0.2s ease-in-out;
+}
+
+.SideBar-Open{
+    width: 20vw;
+    height: 100vh;
+}
+
+.SideBar-Close{
+    width: 0vw;
+    height: 100vh;
+}

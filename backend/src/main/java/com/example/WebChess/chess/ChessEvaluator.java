@@ -299,13 +299,19 @@ public class ChessEvaluator {
         int startingRow=isWhite?6:1;
 
         boolean couldMove=false;
-        if(board[yS+direction][xS]=='.'){
-            couldMove=true;
-            result.add(encodePosition(xS, yS+direction));
+
+        if(yS+direction>=0 && yS+direction<8){
+            if(board[yS+direction][xS]=='.'){
+                couldMove=true;
+                result.add(encodePosition(xS, yS+direction));
+            }
         }
+
         if(yS==startingRow && couldMove){
-            if(board[yS+direction*2][xS]=='.'){
-                result.add(encodePosition(xS, yS+direction*2));
+            if(yS+direction>=0 && yS+direction<8) {
+                if(board[yS+direction*2][xS]=='.'){
+                    result.add(encodePosition(xS, yS+direction*2));
+                }
             }
         }
 
@@ -336,7 +342,7 @@ public class ChessEvaluator {
                 switch (Character.toLowerCase(board[y][x])){
                     case 'p'->{score+=sign*100;}
                     case 'r'->{score+=sign*300;}
-                    case 'k'->{score+=sign*10000;}
+                    case 'k'->{score+=sign*100000;}
                     case 'n'->{score+=sign*500;}
                     case 'b'->{score+=sign*300;}
                     case 'q'->{score+=sign*1000;}

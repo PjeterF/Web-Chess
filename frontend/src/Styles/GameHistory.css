@@ -1,0 +1,23 @@
+@import 'Shared-Colors.css';
+
+.GameHistory-Container{
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+    height: 90vh;
+
+    background-image: url('/public/background2.png');
+    background-repeat: repeat;
+    background-size: 512px 512px;
+    image-rendering: pixelated;
+    background-color: var(--primary-color);
+    padding: 20px;
+}
+
+.GameHistory-List{
+    height: 85vh;
+    width: 50vw;
+    overflow-y: scroll;
+    scrollbar-color: var(--primary-color) var(--secondary-color);
+    scrollbar-width: thin;
+}

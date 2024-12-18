@@ -17,6 +17,7 @@ public class GameDTO {
     Boolean blackIsAutomated;
     private List<MoveDTO> moves;
     String result;
+    Integer difficulty;
 
     public GameDTO(Game game) {
         this.id=game.getId();
@@ -30,11 +31,28 @@ public class GameDTO {
         this.whiteIsAutomated =game.getWhiteIsAutomated();
         this.blackIsAutomated =game.getBlackIsAutomated();
         this.result=game.getResult();
+        this.difficulty=game.getDifficulty();
 
         moves=new ArrayList<>();
         for(var move : game.getMoves()){
             moves.add(new MoveDTO(move));
         }
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
+    }
+
+    public Integer getDifficulty() {
+        return difficulty;
+    }
+
+    public void setDifficulty(Integer difficulty) {
+        this.difficulty = difficulty;
     }
 
     public List<MoveDTO> getMoves() {

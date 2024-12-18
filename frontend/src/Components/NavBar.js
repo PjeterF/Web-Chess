@@ -14,12 +14,16 @@ function NavBar(){
 
     return(
         <div className="NavBar-Container">
-            <div className="NavBar-Container Title">
+            <h1 className="NavBar-Container Title">
                 WebChess
-            </div>
+            </h1>
             <div className="NavBar-Container Buttons">
-                <div>{sessionStorage.getItem('username')}</div>
-                <div onClick={handleLogOut} className="button button-red">LogOut</div>
+                <div className="NavBar-Button" onClick={()=>{navigate('/home')}}>Game selection</div>
+                <div className="NavBar-Button" onClick={()=>{navigate('/history')}}>History</div>
+                <div className="NavBar-LogOut-Section">
+                    <div>{sessionStorage.getItem('username')}</div>
+                    <div onClick={handleLogOut} className="button button-danger">LogOut</div>
+                </div>
             </div>
         </div>
     )

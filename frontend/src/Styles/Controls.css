@@ -1,0 +1,7 @@
+@import 'Shared-Colors.css';
+
+.Controls-Container{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}

@@ -1,0 +1,24 @@
+@import 'Shared-Colors.css';
+
+.GameList-Heading{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.GameList-Heading-Item{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5px;
+    color: var(--text-color);
+}
+
+.GameList-Container{
+    display: flex;
+    flex-direction: column;
+    height: 85vh;
+    width: 50vw;
+    overflow-y: scroll;
+    scrollbar-color: var(--primary-color) var(--secondary-color);
+    scrollbar-width: thin;
+}

@@ -130,7 +130,7 @@ export async function undoMove(gameID){
     }
 }
 
-export async function createGame(usesrnameWhite, usernameBlack, whiteIsAutomated, blackIsAutomated){
+export async function createGame(usesrnameWhite, usernameBlack, whiteIsAutomated, blackIsAutomated, difficulty=2){
     try{
         const token=sessionStorage.getItem('token')
         if(token==null){
@@ -147,7 +147,7 @@ export async function createGame(usesrnameWhite, usernameBlack, whiteIsAutomated
             username2:usernameBlack,
             whiteIsAutomated:whiteIsAutomated,
             blackIsAutomated:blackIsAutomated,
-            difficulty:4
+            difficulty:difficulty
             })
         })
 
